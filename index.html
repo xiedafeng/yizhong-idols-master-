@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>一中偶像大师 · 学园养成篇（感性）</title>
+<style>
+  :root{
+    --pink:#ff7eb9; --pink-d:#e85b9d;
+    --blue:#5aa9ff; --blue-d:#3d8bfd;
+    --yellow:#ffb64d; --yellow-d:#f59b1b;
+    --ink:#4a3f55; --ink-soft:#8a7c96;
+    --card:#ffffff;
+    --shadow:0 8px 24px rgba(180,140,160,.18);
+    --shadow-sm:0 3px 10px rgba(180,140,160,.15);
+    --radius:20px;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{
+    font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei",system-ui,-apple-system,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 80% -10%, #ffe3ef 0%, transparent 60%),
+      radial-gradient(1000px 600px at -10% 110%, #e3f0ff 0%, transparent 55%),
+      linear-gradient(160deg, #fff7f0 0%, #fdeef6 55%, #eef6ff 100%);
+    min-height:100vh; overflow-x:hidden; position:relative;
+  }
+
+  /* 飘落装饰 */
+  .petals{ position:fixed; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  .petal{ position:absolute; top:-6%; opacity:.55; animation:fall linear infinite; user-select:none; }
+  @keyframes fall{ 0%{ transform:translateY(-6vh) translateX(0) rotate(0);} 100%{ transform:translateY(108vh) translateX(60px) rotate(360deg);} }
+
+  .app{ position:relative; z-index:2; max-width:1040px; margin:0 auto; padding:18px 16px 60px; }
+  .screen{ display:none; }
+  .screen.active{ display:block; animation:pop .45s cubic-bezier(.2,.9,.3,1.2); }
+  @keyframes pop{ from{ opacity:0; transform:translateY(12px) scale(.98);} to{ opacity:1; transform:none;} }
+
+  /* 顶栏 */
+  .topbar{ display:flex; align-items:center; justify-content:space-between; gap:12px;
+    background:linear-gradient(135deg,#ffd7e8,#d7e7ff); border-radius:var(--radius);
+    padding:14px 20px; box-shadow:var(--shadow); margin-bottom:16px; }
+  .title{ font-size:1.25rem; font-weight:800; letter-spacing:.5px; }
+  .title .sub{ display:block; font-size:.72rem; font-weight:600; color:var(--ink-soft); letter-spacing:1px; }
+  .week-chip{ background:#fff; border-radius:999px; padding:8px 16px; font-weight:800; color:var(--pink-d);
+    box-shadow:var(--shadow-sm); white-space:nowrap; font-size:.9rem; }
+
+  .columns{ display:grid; grid-template-columns:1fr 300px; gap:16px; }
+  @media (max-width:820px){ .columns{ grid-template-columns:1fr; } }
+  .panel{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; }
+
+  /* 轮盘 */
+  .wheel-panel{ display:flex; flex-direction:column; align-items:center; gap:9px; }
+  .wheel-caption{ font-size:.86rem; font-weight:700; color:var(--ink-soft); text-align:center; }
+  .wheel-caption b{ color:var(--ink); }
+  .wheel{ position:relative; width:178px; height:178px; border-radius:50%;
+    box-shadow:inset 0 0 0 1px #f0e6ef, var(--shadow); margin:2px 0; }
+  .wheel-node{ position:absolute; width:62px; height:62px; border-radius:50%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:.7rem; font-weight:800; color:#fff; transition:transform .35s ease, filter .35s ease, box-shadow .35s ease;
+    filter:saturate(.7) opacity(.72); box-shadow:0 3px 8px rgba(0,0,0,.12); text-shadow:0 1px 2px rgba(0,0,0,.15); }
+  .wheel-node .ico{ font-size:1.3rem; line-height:1; }
+  .wheel-node.active{ filter:none; transform:scale(1.16); box-shadow:0 0 0 5px #fff, 0 0 22px currentColor; }
+  .wheel-node.sing{ background:linear-gradient(145deg,#ff9ac7,#f45f9e); color:var(--pink-d); left:50%; top:2%; transform:translateX(-50%); }
+  .wheel-node.dance{ background:linear-gradient(145deg,#7cb9ff,#3d8bfd); color:var(--blue-d); right:2%; bottom:6%; }
+  .wheel-node.visual{ background:linear-gradient(145deg,#ffc874,#f59b1b); color:var(--yellow-d); left:2%; bottom:6%; }
+  .wheel-node.active.sing{ transform:translateX(-50%) scale(1.16); }
+  .needle{ position:absolute; left:50%; top:50%; width:0; height:0;
+    border-left:8px solid transparent; border-right:8px solid transparent; border-top:30px solid #e0457b;
+    transform-origin:50% 100%; transform:translate(-50%,-100%) rotate(0deg);
+    transition:transform .5s cubic-bezier(.3,.9,.4,1.2); filter:drop-shadow(0 2px 3px rgba(0,0,0,.25)); }
+  .boost-note{ font-weight:800; color:#fff; border-radius:999px; padding:6px 14px; font-size:.85rem; box-shadow:var(--shadow-sm); transition:background .4s; }
+
+  /* 资源条 */
+  .bars{ display:flex; flex-direction:column; gap:8px; margin:4px 0 2px; width:100%; }
+  .bar-row{ display:flex; align-items:center; gap:10px; font-size:.82rem; }
+  .bar-label{ width:64px; font-weight:800; flex-shrink:0; }
+  .bar{ flex:1; height:16px; border-radius:999px; background:#f3ebf3; overflow:hidden; box-shadow:inset 0 1px 3px rgba(0,0,0,.06); }
+  .bar-fill{ height:100%; border-radius:999px; transition:width .5s cubic-bezier(.2,.8,.3,1); }
+  .bar-fill.stamina{ background:linear-gradient(90deg,#6fdf8f,#3cc06b); }
+  .bar-fill.stamina.low{ background:linear-gradient(90deg,#ff9a7a,#ff5c5c); }
+  .bar-fill.vigor{ background:linear-gradient(90deg,#ffb64d,#ff8a3d); }
+  .bar-val{ width:44px; text-align:right; font-weight:800; font-variant-numeric:tabular-nums; }
+
+  /* buff 状态卡 */
+  .buff-row{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px; }
+  .buff-box{ border-radius:16px; padding:12px 8px; text-align:center; color:#fff; box-shadow:var(--shadow-sm); position:relative; }
+  .buff-box .ic{ font-size:1.45rem; display:block; }
+  .buff-box .lb{ font-size:.72rem; font-weight:700; opacity:.95; margin-top:2px; }
+  .buff-box .vl{ font-size:1.5rem; font-weight:900; margin-top:2px; font-variant-numeric:tabular-nums; }
+  .buff-box.focus{ background:linear-gradient(150deg,#b49bff,#7f6bf2); }
+  .buff-box.tune{ background:linear-gradient(150deg,#ff9a6a,#ff6a3d); }
+  .buff-box.great{ background:linear-gradient(150deg,#ffd76a,#ffb300); }
+  .buff-box.great .vl{ font-size:1.05rem; }
+
+  .mult-note{ margin-top:10px; text-align:center; font-size:.8rem; color:var(--ink-soft); line-height:1.6; }
+  .mult-note b{ color:var(--ink); }
+
+  /* 卡牌 */
+  .hand-title{ font-weight:800; margin:14px 2px 10px; font-size:.95rem; }
+  .hand-title span{ color:var(--pink-d); }
+  .cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  @media (max-width:560px){ .cards{ grid-template-columns:1fr; } }
+  .card{ position:relative; border-radius:16px; padding:14px; cursor:pointer; background:#fff;
+    box-shadow:var(--shadow-sm); border:2px solid transparent; overflow:hidden;
+    transition:transform .22s cubic-bezier(.2,.9,.3,1.35), box-shadow .22s ease, border-color .22s ease; animation:rise .4s ease backwards; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(14px);} to{ opacity:1; transform:none;} }
+  .card:hover{ transform:translateY(-14px) scale(1.04); box-shadow:0 18px 34px rgba(180,140,160,.38); }
+  .card:active{ transform:translateY(-1px) scale(.98); }
+  .card .topstrip{ position:absolute; top:0; left:0; right:0; height:5px; }
+  .card.type-a{ border-color:#ffd9d9; } .card.type-a .topstrip{ background:linear-gradient(90deg,#ff8a8a,#ff5c5c); }
+  .card.type-m{ border-color:#d5f0e2; } .card.type-m .topstrip{ background:linear-gradient(90deg,#6fdf8f,#3cc06b); }
+  .card .tag{ display:inline-block; font-size:.62rem; font-weight:900; color:#fff; padding:2px 7px; border-radius:6px; letter-spacing:.5px; }
+  .card.type-a .tag{ background:#ff5c5c; }
+  .card.type-m .tag{ background:#3cc06b; }
+  .card .cname{ font-weight:800; font-size:1rem; display:flex; align-items:center; gap:6px; margin-top:6px; }
+  .card .cdesc{ font-size:.78rem; color:var(--ink-soft); margin-top:7px; line-height:1.5; }
+  .card .ccost{ position:absolute; top:12px; right:12px; font-size:.72rem; font-weight:800; padding:3px 9px; border-radius:999px; background:#fff2f2; color:#e04b4b; }
+  .card.played{ animation:playfly .5s ease forwards; pointer-events:none; }
+  @keyframes playfly{ 40%{ transform:scale(1.1) rotate(-2deg);} 100%{ transform:scale(.9) translateY(10px); opacity:0;} }
+
+  /* 出牌 · 技能名艺术字飘字 */
+  .skill-pop{
+    position:fixed; left:50%; top:50%; z-index:300; pointer-events:none;
+    transform:translate(-50%,-50%);
+    font-size:clamp(2.6rem, 8vw, 5rem); font-weight:900; letter-spacing:.12em; white-space:nowrap;
+    background:linear-gradient(180deg, #fff8fb 0%, #ffd7e8 35%, #ff7eb9 65%, #f45f9e 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    -webkit-text-stroke:1.5px #c2447f;
+    filter:drop-shadow(0 6px 18px rgba(232,91,157,.6)) drop-shadow(0 0 6px rgba(255,182,77,.5));
+    animation:skillpop 1.05s cubic-bezier(.22,.8,.3,1) forwards;
+  }
+  @keyframes skillpop{
+    0%{ opacity:0; transform:translate(-50%,-20%) scale(.55) rotate(-3deg); }
+    15%{ opacity:1; transform:translate(-50%,-58%) scale(1.08) rotate(1deg); }
+    28%{ transform:translate(-50%,-66%) scale(1) rotate(0); }
+    72%{ opacity:1; }
+    100%{ opacity:0; transform:translate(-50%,-240%) scale(.9) rotate(2deg); }
+  }
+
+  /* 卡牌悬停提示框 */
+  .card-tip{
+    position:fixed; z-index:400; pointer-events:none; display:none;
+    width:210px; background:#fff; border:1px solid #f0e6ef; border-radius:14px;
+    box-shadow:0 12px 30px rgba(74,63,85,.26); padding:11px 14px 12px;
+    font-size:.78rem; color:var(--ink); line-height:1.5;
+  }
+  .card-tip.show{ display:block; }
+  .card-tip .tip-name{ font-weight:900; font-size:.95rem; padding-right:52px; }
+  .card-tip .tip-cost{ position:absolute; top:10px; right:13px; font-weight:900; font-size:.84rem; color:#e04b4b; background:#fff2f2; padding:2px 9px; border-radius:999px; }
+  .card-tip .tip-buffs{ display:flex; flex-direction:column; gap:2px; margin:7px 0 7px; padding:6px 0; border-top:1px dashed #eee; border-bottom:1px dashed #eee; }
+  .card-tip .tip-buffs span{ line-height:1.45; }
+  .card-tip .tip-reuse{ font-size:.7rem; color:var(--ink-soft); }
+
+  /* 牌库查看界面（近全屏） */
+  .deck-overlay{ position:fixed; inset:0; z-index:200; background:rgba(74,63,85,.58);
+    display:none; align-items:center; justify-content:center; }
+  .deck-overlay.show{ display:flex; }
+  .deck-panel{ width:min(96vw, 920px); height:min(92vh, 780px); background:#fff; border-radius:20px;
+    box-shadow:0 24px 70px rgba(0,0,0,.32); padding:18px 20px; display:flex; flex-direction:column; overflow:hidden; }
+  .deck-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-shrink:0; }
+  .deck-title{ font-size:1.35rem; font-weight:900; color:var(--ink); letter-spacing:1px; }
+  .deck-close{ border:none; background:#f3ebf3; width:36px; height:36px; border-radius:10px;
+    cursor:pointer; font-size:1rem; color:var(--ink-soft); transition:background .15s ease; }
+  .deck-close:hover{ background:#e8dce8; }
+  .deck-body{ overflow-y:auto; flex:1; min-height:0; }
+  .deck-sec{ margin-bottom:18px; }
+  .deck-sec:last-child{ margin-bottom:0; }
+  .deck-sec-title{ font-size:.82rem; font-weight:900; color:var(--ink-soft); letter-spacing:1px; margin-bottom:8px; padding-left:2px; }
+  .deck-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:12px; padding:2px 2px 4px; }
+  .deck-empty{ grid-column:1/-1; font-size:.78rem; color:var(--ink-soft); padding:6px 2px; }
+  .deck-card{ position:relative; border-radius:14px; padding:12px 13px; background:#fff;
+    border:2px solid transparent; box-shadow:var(--shadow-sm); }
+  .deck-card.type-a{ border-color:#ffd9d9; } .deck-card.type-m{ border-color:#d5f0e2; }
+  .deck-card .dc-name{ font-weight:900; font-size:.98rem; color:var(--ink); padding-right:44px; }
+  .deck-card .dc-cost{ position:absolute; top:12px; right:12px; font-weight:900; font-size:.78rem;
+    color:#e04b4b; background:#fff2f2; padding:2px 9px; border-radius:999px; }
+  .deck-card .dc-type{ display:inline-block; font-size:.6rem; font-weight:900; color:#fff; padding:2px 7px;
+    border-radius:6px; letter-spacing:.5px; margin-right:5px; vertical-align:1px; }
+  .deck-card.type-a .dc-type{ background:#ff5c5c; } .deck-card.type-m .dc-type{ background:#3cc06b; }
+  .deck-card .dc-buffs{ display:flex; flex-direction:column; gap:2px; margin:7px 0 6px; padding:6px 0;
+    border-top:1px dashed #eee; border-bottom:1px dashed #eee; font-size:.76rem; line-height:1.45; }
+  .deck-card .dc-reuse{ font-size:.68rem; color:var(--ink-soft); }
+
+  /* 对手面板 */
+  .rival-head{ display:flex; align-items:center; gap:12px; }
+  .avatar{ width:56px; height:56px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.7rem; box-shadow:var(--shadow-sm); flex-shrink:0; }
+  .avatar.you{ background:linear-gradient(145deg,#ffe3ef,#ffd7e8); }
+  .avatar.foe{ background:linear-gradient(145deg,#e6ecff,#d7e2ff); }
+  .rival-name{ font-weight:800; }
+  .rival-role{ font-size:.72rem; color:var(--ink-soft); }
+  .vs-bar{ margin-top:14px; }
+  .vs-bar .row{ display:flex; justify-content:space-between; font-size:.8rem; font-weight:700; margin-bottom:4px; }
+  .track{ height:12px; border-radius:999px; background:#f3ebf3; overflow:hidden; margin:6px 0 10px; position:relative; }
+  .track .fill{ position:absolute; top:0; bottom:0; left:0; border-radius:999px; transition:width .5s ease; }
+  .track.you .fill{ background:linear-gradient(90deg,#ff9ac7,#f45f9e); }
+  .track.foe .fill{ background:linear-gradient(90deg,#7cb9ff,#3d8bfd); }
+  .rival-hint{ font-size:.75rem; color:var(--ink-soft); text-align:center; line-height:1.5; }
+
+  .log{ margin-top:14px; max-height:170px; overflow-y:auto; border-radius:12px; background:#fbf5fb; padding:10px 12px; font-size:.8rem; line-height:1.7; }
+  .log div{ animation:rise .3s ease both; }
+
+  /* 按钮 */
+  .btn{ display:inline-block; border:none; cursor:pointer; font-weight:800; font-family:inherit;
+    border-radius:999px; padding:13px 30px; font-size:.98rem; color:#fff; letter-spacing:1px;
+    background:linear-gradient(135deg,#ff8fbb,#ff5c9d); box-shadow:0 8px 20px rgba(255,92,157,.35);
+    transition:transform .15s ease, box-shadow .15s ease; user-select:none; }
+  .btn:hover{ transform:translateY(-2px); box-shadow:0 11px 26px rgba(255,92,157,.45); }
+  .btn:active{ transform:translateY(0) scale(.97); }
+  .btn.ghost{ background:#fff; color:var(--pink-d); box-shadow:var(--shadow-sm); }
+
+  /* 开场屏 */
+  .start-inner{ max-width:640px; margin:4vh auto 0; text-align:center; }
+  .hero{ font-size:2.6rem; font-weight:900; letter-spacing:2px; line-height:1.1; margin-bottom:6px;
+    background:linear-gradient(135deg,#ff5c9d,#3d8bfd,#f59b1b); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .hero-sub{ color:var(--ink-soft); font-weight:600; letter-spacing:2px; margin-bottom:20px; }
+  .idol-card{ display:flex; align-items:center; gap:16px; text-align:left; background:#fff; border-radius:18px;
+    padding:18px; box-shadow:var(--shadow); margin:0 auto 14px; max-width:480px; }
+  .idol-card .big{ width:74px; height:74px; font-size:2.6rem; }
+  .idol-card h3{ font-size:1.1rem; }
+  .idol-card p{ font-size:.8rem; color:var(--ink-soft); margin-top:4px; line-height:1.5; }
+  .type-chip{ display:inline-block; font-size:.7rem; font-weight:800; color:#fff; background:linear-gradient(135deg,#b49bff,#7f6bf2); border-radius:999px; padding:3px 10px; margin-left:6px; }
+  .rules{ background:#fff; border-radius:18px; padding:18px 22px; box-shadow:var(--shadow); text-align:left; font-size:.85rem; line-height:1.85; margin-bottom:22px; }
+  .rules h4{ text-align:center; margin-bottom:8px; color:var(--pink-d); }
+  .rules .tag{ display:inline-block; font-size:.62rem; font-weight:900; color:#fff; padding:1px 6px; border-radius:5px; }
+  .rules .tag.a{ background:#ff5c5c; } .rules .tag.m{ background:#3cc06b; }
+
+  /* 选角屏 */
+  #screen-select .start-inner{ max-width:1040px; }
+  .idol-carousel{ display:flex; align-items:center; gap:12px; margin:22px 0; }
+  .page-btn{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;
+    width:58px; height:58px; border-radius:16px; border:none; cursor:pointer; font-size:1.5rem; line-height:1;
+    color:var(--pink-d); background:#fff; box-shadow:var(--shadow-sm); font-family:inherit; flex-shrink:0;
+    transition:transform .15s ease, box-shadow .15s ease, opacity .15s ease; }
+  .page-btn span{ font-size:.56rem; font-weight:800; letter-spacing:1px; }
+  .page-btn:hover:not(:disabled){ transform:translateY(-2px); box-shadow:var(--shadow); }
+  .page-btn:active:not(:disabled){ transform:scale(.94); }
+  .page-btn:disabled{ opacity:.35; cursor:default; }
+  .idol-grid{ flex:1; display:grid; grid-template-columns:repeat(5,1fr); gap:12px; }
+  .idol-pick{ background:#fff; border-radius:18px; padding:16px 10px; box-shadow:var(--shadow);
+    cursor:pointer; text-align:center; border:3px solid transparent;
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease; }
+  .idol-pick:hover{ transform:translateY(-4px); }
+  .idol-pick:active{ transform:translateY(-1px) scale(.98); }
+  .idol-pick .pick-avatar{ width:64px; height:64px; border-radius:50%; margin:0 auto 10px;
+    display:flex; align-items:center; justify-content:center; font-size:2.2rem; box-shadow:var(--shadow-sm); overflow:hidden; }
+  .idol-pick .pick-avatar img{ width:100%; height:100%; object-fit:cover; }
+  .idol-pick h3{ font-size:.95rem; }
+  .idol-pick .pick-sub{ font-size:.66rem; color:var(--ink-soft); letter-spacing:1px; margin-top:2px; }
+  .idol-pick .pick-color{ display:inline-block; margin-top:8px; font-size:.66rem; font-weight:800; color:#fff; border-radius:999px; padding:3px 10px; }
+  .idol-pick p{ font-size:.7rem; color:var(--ink-soft); margin-top:8px; line-height:1.5; }
+  .idol-pick .pick-perk{ margin-top:8px; font-size:.68rem; font-weight:800; color:var(--pink-d); }
+
+  /* 结算屏 */
+  .result-inner{ max-width:600px; margin:4vh auto 0; text-align:center; }
+  .grade{ font-size:5rem; font-weight:900; line-height:1; animation:pop .6s cubic-bezier(.2,.9,.3,1.4); }
+  .grade.s{ background:linear-gradient(135deg,#ffd700,#ff8a3d); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .grade.a{ color:#f59b1b; } .grade.b{ color:#3d8bfd; } .grade.c{ color:#9aa0a8; }
+  .result-verdict{ font-size:1.4rem; font-weight:800; margin:8px 0 4px; }
+  .result-sub{ color:var(--ink-soft); margin-bottom:18px; }
+  .breakdown{ background:#fff; border-radius:18px; padding:16px 20px; box-shadow:var(--shadow); text-align:left; font-size:.9rem; margin-bottom:20px; }
+  .breakdown .line{ display:flex; justify-content:space-between; padding:5px 0; border-bottom:1px dashed #f0e6ef; }
+  .breakdown .line:last-child{ border-bottom:none; }
+  .breakdown .total{ font-size:1.1rem; font-weight:900; color:var(--pink-d); }
+  .breakdown .rival{ color:var(--blue-d); }
+  .confetti{ position:fixed; inset:0; pointer-events:none; z-index:50; }
+  .confetti span{ position:absolute; width:10px; height:14px; top:-5%; border-radius:2px; animation:cf linear forwards; }
+  @keyframes cf{ 0%{ transform:translateY(-5vh) rotate(0);} 100%{ transform:translateY(108vh) rotate(720deg);} }
+
+  /* ===== 比赛界面布局 ===== */
+  #screen-game{ position:fixed; inset:0; z-index:2; }
+
+  /* 左上：颜色轮盘（12 等分圆环） */
+  .ring-box{ position:absolute; top:14px; left:14px; z-index:6; display:flex; flex-direction:column; align-items:center; gap:6px; }
+  .ring{ position:relative; width:120px; height:120px; border-radius:50%;
+    background:repeating-conic-gradient(#ff5c5c 0deg 30deg, #3d8bfd 30deg 60deg, #f5b62d 60deg 90deg);
+    box-shadow:0 6px 18px rgba(0,0,0,.18); }
+  .ring::after{ content:''; position:absolute; inset:17px; background:#fff; border-radius:50%;
+    box-shadow:inset 0 1px 5px rgba(0,0,0,.08); z-index:1; }
+  .ring-center{ position:absolute; inset:17px; z-index:2; display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .ring-center .n{ font-size:1.8rem; font-weight:900; line-height:1; color:var(--ink); }
+  .ring-center .t{ font-size:.58rem; font-weight:700; color:var(--ink-soft); }
+  .ring-needle{ position:absolute; left:50%; bottom:50%; width:5px; height:48px; margin-left:-2.5px;
+    background:#4a3f55; border-radius:3px; transform-origin:50% 100%; z-index:3;
+    transition:transform .6s cubic-bezier(.3,.9,.4,1.2); }
+  .ring-note{ font-weight:800; font-size:.74rem; color:#fff; border-radius:999px; padding:4px 12px; box-shadow:var(--shadow-sm); transition:background .4s; }
+
+  /* 左上：轮盘旁 · 加成与提示文字 */
+  .hud-note{ position:absolute; top:18px; left:152px; z-index:6; display:flex; flex-direction:column; gap:6px; max-width:220px; }
+  .hud-note .mult-note{ margin:0; text-align:left; }
+  .hud-note .rival-hint{ text-align:left; }
+
+  /* 顶部中央：比分 */
+  .score-box{ position:absolute; top:16px; left:50%; transform:translateX(-50%);
+    width:min(520px, calc(100vw - 180px)); z-index:5; display:flex; flex-direction:column; gap:7px; }
+  .score-line{ display:flex; align-items:center; gap:10px; }
+  .score-line .who{ width:auto; min-width:48px; font-weight:900; font-size:.88rem; flex-shrink:0; text-align:center; }
+  .score-line .who.you{ color:var(--pink-d); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; }
+  .score-line .who.foe{ color:var(--blue-d); }
+  .who-avatar{ width:42px; height:42px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:1.4rem; overflow:hidden; background:linear-gradient(145deg,#ffe3ef,#ffd7e8); box-shadow:var(--shadow-sm); flex-shrink:0; }
+  .who-avatar img{ width:100%; height:100%; object-fit:cover; }
+  .who-name{ font-size:.62rem; line-height:1; max-width:56px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .score-track{ flex:1; height:20px; border-radius:999px; background:#fff; overflow:hidden; box-shadow:inset 0 1px 4px rgba(0,0,0,.1), var(--shadow-sm); }
+  .score-track .fill{ height:100%; width:0; border-radius:999px; transition:width .5s ease; }
+  .score-track .fill.you{ background:linear-gradient(90deg,#ff9ac7,#f45f9e); }
+  .score-track .fill.foe{ background:linear-gradient(90deg,#7cb9ff,#3d8bfd); }
+  .score-num{ min-width:66px; text-align:right; font-weight:900; font-size:1.1rem; font-variant-numeric:tabular-nums; flex-shrink:0; }
+
+  /* 左侧中央：buff（缩小） */
+  .side-buffs{ position:absolute; left:12px; top:50%; transform:translateY(-50%); z-index:6; display:flex; flex-direction:column; gap:10px; }
+  .buff-chip{ width:58px; padding:10px 4px; border-radius:14px; text-align:center; color:#fff; box-shadow:var(--shadow-sm); }
+  .buff-chip .ic{ font-size:.29rem; display:block; line-height:1; }
+  .buff-chip b{ font-size:.6rem; font-weight:800; display:block; margin-top:3px; }
+  .buff-chip .vl{ font-size:1.15rem; font-weight:900; display:block; margin-top:1px; }
+  .buff-chip.focus{ background:linear-gradient(160deg,#b49bff,#7f6bf2); }
+  .buff-chip.tune{ background:linear-gradient(160deg,#ff9a6a,#ff6a3d); }
+  .buff-chip.great{ background:linear-gradient(160deg,#ffd76a,#ffb300); }
+  .buff-chip.great .vl{ font-size:.85rem; }
+
+  /* 中部：状态 + 日志 */
+  .mid-area{ position:absolute; left:88px; right:18px; top:152px; bottom:262px; display:flex; flex-direction:column; gap:10px; min-height:0; }
+  .mid-area .log{ flex:1; max-height:none; margin-top:0; }
+
+  /* 右上：体力 / 元气（缩短为屏宽 1/10） */
+  #screen-game .bars{ position:absolute; top:14px; right:14px; z-index:7; width:10vw; min-width:118px; gap:5px; margin:0; }
+  #screen-game .bar-row{ gap:6px; font-size:.72rem; }
+  #screen-game .bar-label{ width:auto; }
+  #screen-game .bar{ height:12px; }
+  #screen-game .bar-val{ width:auto; min-width:32px; }
+
+  /* 底部：卡牌（加大） */
+  .hand-bottom{ position:absolute; left:0; right:0; bottom:0; padding:10px 16px 16px; z-index:6;
+    background:linear-gradient(180deg, transparent, rgba(255,255,255,.9)); }
+  .hand-bottom .hand-title{ text-align:center; margin:0 0 12px; font-size:1.05rem; }
+  .hand-cards-wrap{ position:relative; max-width:1120px; margin:0 auto; }
+  .hand-bottom .cards{ gap:14px; }
+  .hand-bottom .card{ padding:12px 18px; min-height:112px; }
+  .hand-bottom .card .cname{ font-size:1.25rem; }
+  .hand-bottom .card .cdesc{ font-size:.88rem; }
+  .hand-bottom .card .ccost{ font-size:.84rem; padding:5px 12px; top:14px; right:14px; }
+  .hand-bottom .card .tag{ font-size:.7rem; }
+
+  /* 休息按钮（右上角，绿色方块 + 爱心） */
+  .rest-btn{ position:absolute; right:0; top:-56px; width:54px; height:54px; border-radius:14px;
+    border:none; cursor:pointer; color:#fff; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background:linear-gradient(160deg,#5fd98c,#2fb469); box-shadow:var(--shadow-sm);
+    transition:transform .15s ease, box-shadow .15s ease; }
+  .rest-btn .ic{ font-size:1.5rem; line-height:1; }
+  .rest-btn .lb{ font-size:.58rem; font-weight:800; margin-top:2px; letter-spacing:1px; }
+  .rest-btn:hover{ transform:translateY(-3px); box-shadow:var(--shadow); }
+  .rest-btn:active{ transform:scale(.94); }
+
+  /* 牌库按钮（休息按钮上方的小方块） */
+  .deck-btn{ position:absolute; right:0; top:-102px; width:38px; height:38px; border-radius:11px;
+    border:none; cursor:pointer; font-size:1.25rem; line-height:1; color:var(--ink);
+    background:#fff; box-shadow:var(--shadow-sm); display:flex; align-items:center; justify-content:center;
+    transition:transform .15s ease, box-shadow .15s ease; }
+  .deck-btn:hover{ transform:translateY(-2px); box-shadow:var(--shadow); }
+  .deck-btn:active{ transform:scale(.92); }
+
+  /* 卡牌入库动画 */
+  .stock-overlay{ position:fixed; inset:0; z-index:100; background:rgba(74,63,85,.55);
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;
+    animation:stockfade .3s ease; }
+  @keyframes stockfade{ from{opacity:0;} to{opacity:1;} }
+  .stock-overlay.hide{ opacity:0; transition:opacity .3s ease; }
+  .stock-overlay .card{ position:fixed; margin:0; cursor:default; }
+  .stock-deck{ font-size:4.4rem; line-height:1; filter:drop-shadow(0 6px 16px rgba(0,0,0,.35)); }
+  .stock-label{ color:#fff; font-weight:800; letter-spacing:1px; background:rgba(0,0,0,.28); padding:8px 18px; border-radius:999px; }
+
+  @media (max-width:640px){
+    .ring{ width:86px; height:86px; }
+    .ring::after{ inset:12px; }
+    .ring-center{ inset:12px; }
+    .ring-center .n{ font-size:1.35rem; }
+    .ring-needle{ height:34px; }
+    .ring-box{ top:12px; left:10px; }
+    .ring-note{ font-size:.66rem; padding:3px 9px; }
+    .score-box{ width:calc(100vw - 210px); top:14px; }
+    .score-line .who{ width:auto; min-width:36px; font-size:.76rem; }
+    .who-avatar{ width:34px; height:34px; font-size:1.1rem; }
+    .who-name{ font-size:.56rem; max-width:42px; }
+    .score-num{ min-width:52px; font-size:.9rem; }
+    #screen-game .bars{ top:12px; right:8px; min-width:96px; }
+    #screen-game .bar-row{ gap:4px; font-size:.62rem; }
+    #screen-game .bar{ height:10px; }
+    #screen-game .bar-val{ min-width:26px; }
+    .hud-note{ top:126px; left:10px; right:10px; max-width:none; gap:4px; }
+    .hud-note .mult-note{ font-size:.72rem; }
+    .hud-note .rival-hint{ font-size:.68rem; }
+    .mid-area{ left:70px; right:10px; top:176px; bottom:292px; }
+    .side-buffs{ left:6px; gap:7px; }
+    .buff-chip{ width:46px; padding:8px 2px; border-radius:12px; }
+    .buff-chip .ic{ font-size:.24rem; }
+    .buff-chip .vl{ font-size:.95rem; }
+    .hand-bottom .cards{ gap:8px; }
+    .hand-bottom .card{ padding:10px 12px; min-height:96px; }
+    .hand-bottom .card .cname{ font-size:1rem; }
+    .hand-bottom .card .cdesc{ font-size:.76rem; }
+  }
+</style>
+</head>
+<body>
+  <div class="petals" id="petals"></div>
+
+  <div class="app">
+    <!-- 开场 -->
+    <section class="screen active" id="screen-start">
+      <div class="start-inner">
+        <div class="hero">一中偶像大师</div>
+        <div class="hero-sub">学园养成篇 · School Idol Producer</div>
+
+        <div class="rules">
+          <h4>📖 玩法说明</h4>
+          <b>① 12 周养成</b>：每回合随机抽 <b>3 张牌</b>（三选一）打出，累计 <b>打分</b> 与对手比拼。<br>
+          <b>② 两种牌</b>：<span class="tag a">A</span> 攻击牌（主要打分）、<span class="tag m">M</span> 支援牌（主要叠 buff）。<br>
+          <b>③ 三个 buff</b>：<b>集中</b>（每点 +1 伤害，加法）、<b>好调</b>（≥1 时伤害 ×1.5，每回合开始 -1）、<b>绝好调</b>（使好调变为 ×(1.5+0.1×好调数)）。<br>
+          <b>④ 出伤公式</b>：<b>(卡牌伤害 + 集中) × 好调倍率 × 颜色倍率</b>。<br>
+          <b>⑤ 颜色轮盘</b>：每回合轮转，轮到偶像得意色（唱）时本回合伤害 <b>×1.5</b>；颜色只在当回合出伤时生效，不累计。<br>
+          <b>⑥ 体力 / 元气</b>：打牌消耗先扣元气、不足扣体力；体力归零进入<b>体调不良</b>（伤害减半）。<br>
+          <b>⑦ 特殊</b>：<b>再动</b>（本回合可再打一张）、<b>抽牌 N</b>（下次抽牌多 N 张）。
+        </div>
+
+        <button class="btn" id="btn-start">选择偶像 ✨</button>
+      </div>
+    </section>
+
+    <!-- 选角 -->
+    <section class="screen" id="screen-select">
+      <div class="start-inner">
+        <div class="hero">选择你的偶像</div>
+        <div class="hero-sub">Pick Your Idol · 得意色决定伤害加成时机，起始状态决定开局节奏</div>
+        <div class="idol-carousel">
+          <button class="page-btn" id="idol-prev" title="上一页">‹<span>上一页</span></button>
+          <div class="idol-grid" id="idol-grid"></div>
+          <button class="page-btn" id="idol-next" title="下一页">›<span>下一页</span></button>
+        </div>
+        <button class="btn ghost" id="btn-back-start">← 返回首页</button>
+      </div>
+    </section>
+
+    <!-- 主游戏 -->
+    <section class="screen" id="screen-game">
+      <!-- 左上：颜色轮盘 -->
+      <div class="ring-box">
+        <div class="ring" id="ring">
+          <div class="ring-center"><span class="n" id="ring-week">1</span><span class="t">/12 周</span></div>
+          <div class="ring-needle" id="ring-needle"></div>
+        </div>
+        <div class="ring-note" id="ring-note">🎤 唱 ×1.5</div>
+      </div>
+
+      <!-- 左上：轮盘旁 · 加成与提示 -->
+      <div class="hud-note">
+        <div class="mult-note" id="mult-note">当前加成：🎯 伤害 +0 ｜ 🎵 无</div>
+        <div class="rival-hint" id="rival-hint">对手正在努力训练中…</div>
+      </div>
+
+      <!-- 顶部中央：比分 -->
+      <div class="score-box">
+        <div class="score-line">
+          <span class="who you"><span class="who-avatar" id="you-avatar"></span><span class="who-name" id="you-name">你</span></span>
+          <div class="score-track"><div class="fill you" id="you-fill"></div></div>
+          <span class="score-num" id="you-score">0 分</span>
+        </div>
+        <div class="score-line">
+          <span class="who foe">对手</span>
+          <div class="score-track"><div class="fill foe" id="foe-fill"></div></div>
+          <span class="score-num" id="foe-score">0 分</span>
+        </div>
+      </div>
+
+      <!-- 左侧中央：buff -->
+      <div class="side-buffs">
+        <div class="buff-chip focus"><span class="ic">🎯</span><b>集中</b><span class="vl" id="buff-focus">0</span></div>
+        <div class="buff-chip tune"><span class="ic">🎵</span><b>好调</b><span class="vl" id="buff-tune">0</span></div>
+        <div class="buff-chip great"><span class="ic">🌟</span><b>绝好调</b><span class="vl" id="buff-great">—</span></div>
+      </div>
+
+      <!-- 右上：体力 / 元气 -->
+      <div class="bars">
+        <div class="bar-row">
+          <div class="bar-label">❤️ 体力</div>
+          <div class="bar"><div class="bar-fill stamina" id="stamina-fill"></div></div>
+          <div class="bar-val" id="stamina-val">100</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">🔥 元气</div>
+          <div class="bar"><div class="bar-fill vigor" id="vigor-fill"></div></div>
+          <div class="bar-val" id="vigor-val">0</div>
+        </div>
+      </div>
+
+      <!-- 中部：日志 -->
+      <div class="mid-area">
+        <div class="log" id="log"></div>
+      </div>
+
+      <!-- 底部：卡牌 -->
+      <div class="hand-bottom">
+        <div class="hand-title">🎴 本回合抽卡 · 请 <span>三选一</span> 打出</div>
+        <div class="hand-cards-wrap">
+          <div class="cards" id="cards"></div>
+          <button class="deck-btn" id="deck-btn" title="查看牌库">📚</button>
+          <button class="rest-btn" id="rest-btn" title="休息一回合 · 体力 +8">
+            <span class="ic">❤️</span><span class="lb">休息</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 结算 -->
+    <section class="screen" id="screen-result">
+      <div class="result-inner">
+        <div class="grade" id="grade">S</div>
+        <div class="result-verdict" id="verdict">胜利！</div>
+        <div class="result-sub" id="result-sub">你成功带领偶像击败了宿敌</div>
+        <div class="breakdown" id="breakdown"></div>
+        <button class="btn" id="btn-again">再来一局 🔄</button>
+        <button class="btn ghost" id="btn-home" style="margin-left:10px;">返回首页</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+  <div class="card-tip" id="card-tip"></div>
+
+  <!-- 牌库查看 -->
+  <div class="deck-overlay" id="deck-overlay">
+    <div class="deck-panel">
+      <div class="deck-head">
+        <span class="deck-title">持有技能卡</span>
+        <button class="deck-close" id="deck-close">✕</button>
+      </div>
+      <div class="deck-body">
+        <div class="deck-sec">
+          <div class="deck-sec-title">🎴 手牌</div>
+          <div class="deck-grid" id="deck-hand"></div>
+        </div>
+        <div class="deck-sec">
+          <div class="deck-sec-title">🂠 牌库</div>
+          <div class="deck-grid" id="deck-pile"></div>
+        </div>
+        <div class="deck-sec">
+          <div class="deck-sec-title">🗑️ 弃牌堆</div>
+          <div class="deck-grid" id="deck-discard"></div>
+        </div>
+        <div class="deck-sec">
+          <div class="deck-sec-title">🚫 除外</div>
+          <div class="deck-grid" id="deck-exiled"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ================= 常量 ================= */
+  const ATTRS = {
+    sing:   { label:'唱', icon:'🎤', color:'#ff5c5c', dark:'#e04545' },
+    dance:  { label:'舞', icon:'💃', color:'#3d8bfd', dark:'#2f6fe0' },
+    visual: { label:'看', icon:'✨', color:'#f5b62d', dark:'#e09a00' },
+  };
+  const WHEEL_ORDER = ['sing','dance','visual'];
+  const WHEEL_ANGLE = { sing:0, dance:120, visual:240 };
+  const TOTAL_WEEKS = 12;
+  const MAX_STAMINA = 100, MAX_VIGOR = 50;
+  const COLOR_MULT = 1.5;           // 得意色本回合伤害倍率
+
+  /* ================= 偶像 ================= */
+  const IDOLS = [
+    { id:'hikari', name:'星野 ひかり', romaji:'Hikari', icon:'🎀', type:'感性', color:'sing',
+      desc:'以「集中 + 好调 + 绝好调」叠出高额打分的感性型偶像，越战越强。',
+      start:{ focus:1 } },
+    { id:'kanade', name:'青羽 かなで', romaji:'Kanade', icon:'🎻', type:'感性', color:'dance',
+      desc:'擅长节奏与连击的感性型偶像，起手好调 1，倍率优势更大。',
+      start:{ tune:1 } },
+    { id:'akari', name:'藤堂 あかり', romaji:'Akari', icon:'🌸', type:'感性', color:'visual',
+      desc:'均衡稳健、续航充沛的感性型偶像，起手元气 10，连打更从容。',
+      start:{ vigor:10 } },
+    { id:'xiangyang', name:'陈向阳', romaji:'Xiangyang', icon:'👨‍🏫', img:'陈向阳/陈向阳.jpg', type:'感性', color:'sing',
+      desc:'来自浔郡中学的特级教师，深受学生喜爱，教过非常多非常优秀的学生，哦对了，陈八分钱',
+      start:{},
+      skillText:'⏱️ 最后 3 回合开始时 分数 +15（受 buff 影响）',
+      finalBonus: 15 },
+    { id:'jinbao', name:'叶锦宝', romaji:'Jinbao', icon:'👨‍🏫', img:'叶锦宝/8362dadf451bfc33cbfe761af8ed31ea.png', type:'感性', color:'sing',
+      desc:'来自浔郡中学的一级教师，深受学生喜爱（存疑），教过非常多非常优秀的学生，级长',
+      start:{ focus:6 } },
+    { id:'zhuzhiwu', name:'烛之舞', romaji:'Zhuzhiwu', icon:'🕯️', img:'烛之舞/c2714588d0e21e3b61de4bc54c858a83.jpg', type:'感性', color:'dance',
+      desc:'秦、晋围郑，郑既知亡矣。若亡郑而有益于君，敢以烦执事。越国以鄙远，君知其难也，焉用亡郑以陪邻？',
+      start:{},
+      skillText:'🔄 蓝色回合（舞）可多打一张 · 每回合限一次',
+      danceExtraAction: true },
+    { id:'longnainailong', name:'龙奶奶龙', romaji:'Longnainailong', icon:'🐉', img:'龙奶奶龙/fb728cfb860c52a8c227617393ee4a44.jpg', type:'感性', color:'visual',
+      desc:'xxf怎么这么坏啊！',
+      start:{},
+      skillText:'🔄 黄色回合（看）可多打一张 · 每回合限一次',
+      visualExtraAction: true },
+    { id:'xiaomin', name:'小民', romaji:'Xiaomin', icon:'🧑‍🎓', img:'小民/9ED978DEC2E368A5C17DA2CA63532312.jpg', type:'感性', color:'sing',
+      desc:'每每与共，知行合一，民大，牛逼！',
+      start:{ focus:9, tune:8 },
+      skillText:'🎯 开局 集中+9 · 🎵 好调+8 · ⏱️ 最后一回合 分数+5',
+      lastTurnBonus: 5 },
+    { id:'wanghaiping', name:'王海平', romaji:'Wanghaiping', icon:'👨‍🏫', img:'王海平/mmexport1764751871196.jpg', type:'感性', color:'dance',
+      desc:'王海平老师，我还记得你，一字一句，把我拉出迷雾里！',
+      start:{ vigor:68 } },
+    { id:'huangjinhua', name:'级长黄金花', romaji:'Huangjinhua', icon:'🌼', img:'黄金花/mmexport1789191252670_edit_1117330593655547.jpg', type:'感性', color:'visual',
+      desc:'不要把我当czw了，想AI搞什么东西 我没给他看哈哈哈，怕他用AI整我',
+      start:{},
+      skillText:'✨ 黄色回合（看）开始时 集中 +3',
+      visualFocusBonus: 3 },
+  ];
+
+  /* ================= 感性卡组 =================
+     字段说明：
+     type      'A'=攻击(打分) / 'M'=支援(buff)
+     cost      消耗体力（有元气优先扣元气）
+     vigor     获得元气
+     damage    伤害（受 集中/好调/绝好调/颜色 影响）
+     focus     集中 buff
+     tune      好调 buff
+     greatTune 绝好调
+     heal      回复体力
+     refresh   再动（本回合可再打一张）
+     draw      抽牌张数（下次抽牌多抽）
+     multi     true=可使用多次（用后进洗牌堆，后续回合仍可出现；缺省=考试舞台仅限一次） */
+  const CARDS = [
+    // —— M 卡：叠 buff / 资源 ——
+    { name:'静心凝神', icon:'🧘', type:'M', cost:2, focus:3, multi:true },
+    { name:'深呼吸',   icon:'🌬️', type:'M', cost:2, focus:1, tune:1, multi:true },
+    { name:'心情高涨', icon:'🎶', type:'M', cost:3, tune:2 },
+    { name:'绝佳状态', icon:'🌟', type:'M', cost:4, greatTune:true },
+    { name:'全神贯注', icon:'🎯', type:'M', cost:4, focus:3, draw:1 },
+    // —— A 卡：打分 ——
+    { name:'全力一击', icon:'👊', type:'A', cost:4, damage:6, multi:true },
+    { name:'华丽绽放', icon:'💐', type:'A', cost:7, damage:10 },
+    { name:'心潮澎湃', icon:'💓', type:'A', cost:6, damage:8, tune:1 },
+    { name:'连击',     icon:'⚡', type:'A', cost:6, damage:5, refresh:true, multi:true },
+    { name:'终场高潮', icon:'🌠', type:'A', cost:9, damage:12 },
+    { name:'节奏攻势', icon:'🥁', type:'A', cost:5, damage:4, draw:2 },
+    { name:'心意合一', icon:'💞', type:'A', cost:5, damage:7, focus:1 },
+  ];
+
+  /* ================= 状态 ================= */
+  let S = null;
+  function newGame(idol){
+    S = {
+      idol: idol,
+      idolColor: idol.color,   // 得意色
+      week: 1,
+      stamina: MAX_STAMINA,
+      vigor: 0,
+      focus: 0,           // 集中
+      tune: 0,            // 好调
+      greatTune: false,   // 绝好调
+      unwell: false,      // 体调不良
+      wheel: 0,           // 轮盘索引
+      actionsLeft: 1,     // 本回合剩余出牌次数
+      bonusDraw: 0,       // 下次抽牌额外张数
+      totalScore: 0,      // 累计打分
+      rival: 0,
+      candidates: [],
+      deck: [],        // 牌库（未使用的牌）
+      discard: [],     // 弃牌堆（用掉的可多次卡 / 未打出的牌）
+      exiled: [],      // 除外（用掉的仅限一次卡）
+      log: [],
+      over: false,
+    };
+    S.deck = shuffle(CARDS.slice());
+    // 起始状态
+    if(idol.start.focus) S.focus = idol.start.focus;
+    if(idol.start.tune)  S.tune = idol.start.tune;
+    if(idol.start.vigor) S.vigor = idol.start.vigor;
+  }
+
+  /* ================= 工具 ================= */
+  function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+  function clamp(v,lo,hi){ return Math.max(lo, Math.min(hi, v)); }
+  function wheelAttr(){ return WHEEL_ORDER[S.wheel]; }
+
+  function tuneMult(){
+    if(S.tune <= 0) return 1;
+    return S.greatTune ? (1.5 + 0.1*S.tune) : 1.5;
+  }
+  function colorMult(){ return wheelAttr() === S.idolColor ? COLOR_MULT : 1; }
+
+  /* ================= 渲染 ================= */
+  const $ = id => document.getElementById(id);
+
+  function renderAll(){
+    $('stamina-val').textContent = S.stamina;
+    $('vigor-val').textContent = S.vigor;
+    $('stamina-fill').style.width = (S.stamina/MAX_STAMINA*100) + '%';
+    $('vigor-fill').style.width = (S.vigor/MAX_VIGOR*100) + '%';
+    $('stamina-fill').classList.toggle('low', S.stamina <= 30);
+
+    $('buff-focus').textContent = S.focus;
+    $('buff-tune').textContent = S.tune;
+    $('buff-great').textContent = S.greatTune ? '有' : '—';
+    $('buff-great').style.opacity = S.greatTune ? 1 : .5;
+
+    const tm = tuneMult();
+    $('mult-note').innerHTML =
+      '当前加成：🎯 伤害 +' + S.focus +
+      ' ｜ 🎵 ' + (tm===1 ? '无好调' : ('伤害 ×' + tm.toFixed(2)));
+
+    $('you-score').textContent = S.totalScore + ' 分';
+    $('foe-score').textContent = S.rival + ' 分';
+    const mx = Math.max(300, S.totalScore, S.rival);
+    $('you-fill').style.width = (S.totalScore/mx*100) + '%';
+    $('foe-fill').style.width = (S.rival/mx*100) + '%';
+
+    renderRing();
+
+    let hint = '对手正在努力训练中…';
+    if(S.unwell){ hint = '💔 体调不良：伤害减半！请用「稍作休息」恢复体力。'; }
+    else if(S.stamina <= 20){ hint = '⚠️ 体力告急！归零将进入体调不良。'; }
+    else if(S.greatTune && S.tune >= 3){ hint = '🌟 绝好调 + 好调满溢，是大打出手的好时机！'; }
+    else if(!S.greatTune){ hint = '💡 先用 M 卡叠「集中/好调」，并尽快拿到「绝好调」。'; }
+    $('rival-hint').textContent = hint;
+  }
+
+  function renderRing(){
+    const deg = (S.week - 1) * 30 + 15;   // 12 等分，指针指向当前周所在扇区
+    $('ring-needle').style.transform = 'rotate(' + deg + 'deg)';
+    $('ring-week').textContent = S.week;
+    const attr = wheelAttr();
+    const a = ATTRS[attr];
+    const isBoost = attr === S.idolColor;
+    const note = $('ring-note');
+    note.textContent = a.icon + ' ' + a.label + (isBoost ? ' ×1.5' : ' ×1.0');
+    note.style.background = isBoost ? a.dark : '#9aa0a8';
+  }
+
+  function cardDesc(card){
+    const p = [];
+    if(card.damage) p.push('⚔️伤害 ' + card.damage);
+    if(card.focus)  p.push('🎯集中 +' + card.focus);
+    if(card.tune)   p.push('🎵好调 +' + card.tune);
+    if(card.greatTune) p.push('🌟绝好调');
+    if(card.vigor)  p.push('🔥元气 +' + card.vigor);
+    if(card.heal)   p.push('🍵体力 +' + card.heal);
+    if(card.refresh)p.push('⟳再动');
+    if(card.draw)   p.push('🂠抽牌 +' + card.draw);
+    return p.join(' · ');
+  }
+
+  function cardBuffs(card){
+    const p = [];
+    if(card.damage) p.push('⚔️ 伤害 +' + card.damage);
+    if(card.focus)  p.push('🎯 集中 +' + card.focus);
+    if(card.tune)   p.push('🎵 好调 +' + card.tune);
+    if(card.greatTune) p.push('🌟 绝好调');
+    if(card.vigor)  p.push('🔥 元气 +' + card.vigor);
+    if(card.heal)   p.push('🍵 体力 +' + card.heal);
+    if(card.refresh)p.push('⟳ 再动');
+    if(card.draw)   p.push('🂠 抽牌 +' + card.draw);
+    return p;
+  }
+
+  function reuseText(card){
+    return card.multi ? '可使用多次' : '考试舞台仅限使用一次';
+  }
+
+  function showTip(card, el){
+    const tip = $('card-tip');
+    const costTxt = card.cost > 0 ? ('❤️' + card.cost) : '免费';
+    const reuse = reuseText(card);
+    tip.innerHTML =
+      '<div class="tip-cost">' + costTxt + '</div>' +
+      '<div class="tip-name">' + card.icon + ' ' + card.name + '</div>' +
+      '<div class="tip-buffs">' + cardBuffs(card).map(b => '<span>' + b + '</span>').join('') + '</div>' +
+      '<div class="tip-reuse">' + reuse + '</div>';
+    tip.classList.add('show');
+    const r = el.getBoundingClientRect();
+    let x = r.left + r.width/2 - tip.offsetWidth/2;
+    let y = r.top - tip.offsetHeight - 10;
+    if(y < 8) y = r.bottom + 10;
+    x = Math.max(8, Math.min(x, window.innerWidth - tip.offsetWidth - 8));
+    tip.style.left = x + 'px';
+    tip.style.top = y + 'px';
+  }
+
+  function hideTip(){
+    $('card-tip').classList.remove('show');
+  }
+
+  function deckCardHTML(card){
+    const costTxt = card.cost > 0 ? ('❤️' + card.cost) : '免费';
+    return '<div class="deck-card type-' + (card.type==='A' ? 'a' : 'm') + '">' +
+        '<div class="dc-cost">' + costTxt + '</div>' +
+        '<div class="dc-name"><span class="dc-type">' + card.type + '</span>' + card.icon + ' ' + card.name + '</div>' +
+        '<div class="dc-buffs">' + cardBuffs(card).map(b => '<span>' + b + '</span>').join('') + '</div>' +
+        '<div class="dc-reuse">' + reuseText(card) + '</div>' +
+      '</div>';
+  }
+
+  function renderDeck(){
+    const sec = (id, arr) => { $(id).innerHTML = arr.length ? arr.map(deckCardHTML).join('') : '<div class="deck-empty">（空）</div>'; };
+    sec('deck-hand', S.candidates);
+    sec('deck-pile', S.deck);
+    sec('deck-discard', S.discard);
+    sec('deck-exiled', S.exiled);
+  }
+
+  function openDeck(){
+    renderDeck();
+    $('deck-overlay').classList.add('show');
+  }
+
+  function closeDeck(){
+    $('deck-overlay').classList.remove('show');
+  }
+
+  function renderCards(){
+    const wrap = $('cards');
+    wrap.innerHTML = '';
+    const n = S.candidates.length;
+    wrap.style.gridTemplateColumns = (n > 3 && window.innerWidth > 560) ? ('repeat(' + n + ', 1fr)') : '';
+    S.candidates.forEach((card, i) => {
+      const el = document.createElement('div');
+      el.className = 'card type-' + (card.type==='A' ? 'a' : 'm');
+      el.style.animationDelay = (i*0.08) + 's';
+      const costTxt = card.cost > 0 ? ('❤️' + card.cost) : '免费';
+      el.innerHTML =
+        '<div class="topstrip"></div>' +
+        '<div class="ccost">' + costTxt + '</div>' +
+        '<div class="cname"><span class="tag">' + card.type + '</span>' + card.icon + ' ' + card.name + '</div>' +
+        '<div class="cdesc">' + cardDesc(card) + '</div>';
+      el.addEventListener('click', () => playCard(card, el));
+      el.addEventListener('mouseenter', () => showTip(card, el));
+      el.addEventListener('mouseleave', hideTip);
+      wrap.appendChild(el);
+    });
+  }
+
+  function addLog(msg){
+    S.log.unshift(msg);
+    if(S.log.length > 40) S.log.pop();
+    const log = $('log');
+    log.innerHTML = '';
+    S.log.forEach(m => { const d = document.createElement('div'); d.innerHTML = m; log.appendChild(d); });
+  }
+
+  function showSkillPop(icon, name){
+    const el = document.createElement('div');
+    el.className = 'skill-pop';
+    el.textContent = (icon ? icon + ' ' : '') + name;
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1150);
+  }
+
+  /* ================= 流程 ================= */
+  function drawCandidates(){
+    const n = 3 + S.bonusDraw;
+    S.bonusDraw = 0;
+    if(S.deck.length < 3 && S.discard.length > 0){
+      S.deck = S.deck.concat(S.discard);
+      S.discard = [];
+      shuffle(S.deck);
+    }
+    const drawn = [];
+    for(let i = 0; i < n; i++){
+      if(S.deck.length === 0) break;
+      drawn.push(S.deck.pop());
+    }
+    S.candidates = drawn;
+  }
+
+  function playCard(card, el){
+    if(S.over) return;
+    hideTip();
+    el.classList.add('played');
+    showSkillPop(card.icon, card.name);
+    S.candidates = S.candidates.filter(c => c !== card);
+    if(card.multi){ S.discard.push(card); }
+    else { S.exiled.push(card); }
+    const lines = [];
+
+    // 1) 消耗：先扣元气，不足扣体力
+    const cost = card.cost || 0;
+    let absorbed = 0;
+    if(cost > 0){
+      absorbed = Math.min(S.vigor, cost);
+      S.vigor -= absorbed;
+      const rem = cost - absorbed;
+      S.stamina = clamp(S.stamina - rem, 0, MAX_STAMINA);
+      lines.push('消耗❤️' + (rem) + (absorbed>0 ? '（元气抵扣'+absorbed+'）' : ''));
+    }
+
+    // 2) buff / 资源
+    if(card.focus){ S.focus += card.focus; lines.push('🎯集中+' + card.focus); }
+    if(card.tune){ S.tune += card.tune; lines.push('🎵好调+' + card.tune); }
+    if(card.greatTune && !S.greatTune){ S.greatTune = true; lines.push('🌟绝好调！'); }
+    if(card.vigor){ S.vigor = clamp(S.vigor + card.vigor, 0, MAX_VIGOR); lines.push('🔥元气+' + card.vigor); }
+    if(card.heal){
+      S.stamina = clamp(S.stamina + card.heal, 0, MAX_STAMINA);
+      lines.push('🍵体力+' + card.heal);
+      if(S.unwell && S.stamina > 0){ S.unwell = false; lines.push('💪摆脱体调不良！'); }
+    }
+
+    // 3) 出伤（A 卡）
+    if(card.damage > 0){
+      let dmg = card.damage + S.focus;
+      const tm = tuneMult();
+      dmg = Math.floor(dmg * tm);
+      const cm = colorMult();
+      dmg = Math.floor(dmg * cm);
+      if(S.unwell) dmg = Math.floor(dmg * 0.5);
+      S.totalScore += dmg;
+      const tags = [];
+      if(tm > 1) tags.push('好调×' + tm.toFixed(2));
+      if(cm > 1) tags.push('得意色×' + COLOR_MULT);
+      lines.push('⚔️打分 +' + dmg + (tags.length ? ('（' + tags.join('，') + '）') : ''));
+    }
+
+    // 4) 再动 / 抽牌
+    if(card.refresh){ S.actionsLeft += 1; lines.push('⟳再动！'); }
+    if(card.draw){ S.bonusDraw += card.draw; lines.push('🂠抽牌+' + card.draw); }
+
+    // 5) 体力归零 → 体调不良
+    if(S.stamina <= 0 && !S.unwell){ S.unwell = true; lines.push('💔体力归零，体调不良！'); }
+
+    addLog('第' + S.week + '周 · <b>' + card.icon + ' ' + card.name + '</b> — ' + lines.join('，'));
+    renderAll();
+
+    S.actionsLeft -= 1;
+    S.over = true;
+    setTimeout(() => {
+      if(S.actionsLeft > 0){
+        S.over = false;
+      } else {
+        endTurn();
+      }
+    }, 620);
+  }
+
+  function rest(){
+    if(S.over) return;
+    hideTip();
+    S.over = true;
+    S.stamina = clamp(S.stamina + 8, 0, MAX_STAMINA);
+    addLog('🛌 休息一回合 · ❤️体力 +8');
+    renderAll();
+    setTimeout(endTurn, 620);
+  }
+
+  function endTurn(){
+    // 对手涨分
+    const gain = 15 + Math.floor(Math.random()*7); // 15~21
+    S.rival += gain;
+    addLog('🌙 对手本周 +' + gain + ' 分');
+    renderAll();
+
+    // 卡牌入库 → 进入下一周
+    showCardStock(() => {
+      // 未打出的手牌进入洗牌堆
+      S.candidates.forEach(c => S.discard.push(c));
+      S.candidates = [];
+      S.week++;
+      if(S.week > TOTAL_WEEKS){ showResult(); return; }
+
+      // 好调衰减（回合开始）
+      if(S.tune > 0){ S.tune--; addLog('🎵 好调衰减 -1（剩 ' + S.tune + '）'); }
+
+      // 角色技能：最后 3 回合开始时加分（受三种 buff 影响）
+      if(S.idol.finalBonus && S.week >= TOTAL_WEEKS - 2){
+        const bonus = Math.floor((S.idol.finalBonus + S.focus) * tuneMult());
+        S.totalScore += bonus;
+        addLog('⏱️ ' + S.idol.name + ' · 最后回合加成 +' + bonus + ' 分');
+      }
+
+      // 角色技能：最后一回合开始时 固定加分
+      if(S.idol.lastTurnBonus && S.week === TOTAL_WEEKS){
+        S.totalScore += S.idol.lastTurnBonus;
+        addLog('⏱️ ' + S.idol.name + ' · 最后一回合开始 分数 +' + S.idol.lastTurnBonus);
+      }
+
+      // 轮盘轮转
+      S.wheel = (S.wheel + 1) % 3;
+      S.actionsLeft = 1;
+      if(S.idol.danceExtraAction && wheelAttr() === 'dance'){
+        S.actionsLeft += 1;
+        addLog('💃 ' + S.idol.name + ' · 蓝色回合可多打一张手牌！');
+      }
+      if(S.idol.visualExtraAction && wheelAttr() === 'visual'){
+        S.actionsLeft += 1;
+        addLog('✨ ' + S.idol.name + ' · 黄色回合可多打一张手牌！');
+      }
+      if(S.idol.visualFocusBonus && wheelAttr() === 'visual'){
+        S.focus += S.idol.visualFocusBonus;
+        addLog('🎯 ' + S.idol.name + ' · 黄色回合开始 集中 +' + S.idol.visualFocusBonus);
+      }
+      drawCandidates();
+      S.over = false;
+      renderAll();
+      renderCards();
+
+      const a = ATTRS[wheelAttr()];
+      addLog('🎯 第' + S.week + '周 · 轮盘色 <b>' + a.icon + a.label + '</b>' + (wheelAttr()===S.idolColor ? '（得意！本回合×1.5）' : ''));
+    });
+  }
+
+  function showCardStock(done){
+    const overlay = document.createElement('div');
+    overlay.className = 'stock-overlay';
+    overlay.innerHTML =
+      '<div class="stock-deck">🂠</div>' +
+      '<div class="stock-label">第 ' + S.week + ' 周结束 · 卡牌入库</div>';
+    document.body.appendChild(overlay);
+
+    // 未打出的手牌飞入卡堆
+    const hand = document.querySelectorAll('#cards .card:not(.played)');
+    hand.forEach((c, i) => {
+      const r = c.getBoundingClientRect();
+      const clone = c.cloneNode(true);
+      clone.style.position = 'fixed';
+      clone.style.left = r.left + 'px';
+      clone.style.top = r.top + 'px';
+      clone.style.width = r.width + 'px';
+      clone.style.height = r.height + 'px';
+      clone.style.margin = '0';
+      clone.style.animation = 'none';
+      clone.style.transition = 'all .55s cubic-bezier(.5,.1,.3,1) ' + (i*0.07) + 's';
+      overlay.appendChild(clone);
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        const dx = window.innerWidth/2 - (r.left + r.width/2);
+        const dy = window.innerHeight/2 - (r.top + r.height/2);
+        clone.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(.18) rotate(' + (i%2 ? 14 : -14) + 'deg)';
+        clone.style.opacity = '0';
+      }));
+    });
+
+    setTimeout(() => {
+      overlay.classList.add('hide');
+      setTimeout(() => { overlay.remove(); done(); }, 320);
+    }, 880);
+  }
+
+  /* ================= 结算 ================= */
+  function showResult(){
+    const total = S.totalScore;
+    const win = total >= S.rival;
+    const ratio = S.rival > 0 ? total / S.rival : 2;
+    let grade, gclass, verdict;
+    if(ratio >= 1.5){ grade='SS'; gclass='s'; }
+    else if(ratio >= 1.25){ grade='S'; gclass='s'; }
+    else if(ratio >= 1.05){ grade='A'; gclass='a'; }
+    else if(ratio >= 0.9){ grade='B'; gclass='b'; }
+    else { grade='C'; gclass='c'; }
+
+    verdict = win ? '🎉 胜利！' : '😢 惜败…';
+    let sub;
+    if(grade==='SS') sub = '超常发挥！你打出了传说的舞台，宿敌甘拜下风！';
+    else if(grade==='S') sub = '完美的养成！感性连击把宿敌甩在身后！';
+    else if(grade==='A') sub = '表现出色！稳稳拿下期末发表会！';
+    else if(grade==='B') sub = '有惊无险，勉强过关，继续努力吧！';
+    else sub = '差距不小，下次更用心地规划 buff 与出牌节奏。';
+
+    $('grade').textContent = grade;
+    $('grade').className = 'grade ' + gclass;
+    $('verdict').textContent = verdict;
+    $('result-sub').textContent = sub;
+
+    const b = $('breakdown');
+    b.innerHTML =
+      '<div class="line"><span>所选偶像</span><span>' + S.idol.icon + ' ' + S.idol.name + '（' + S.idol.type + '）</span></div>' +
+      '<div class="line"><span>最终 集中</span><span>' + S.focus + '</span></div>' +
+      '<div class="line"><span>最终 好调</span><span>' + S.tune + '</span></div>' +
+      '<div class="line"><span>最终 绝好调</span><span>' + (S.greatTune ? '有' : '无') + '</span></div>' +
+      '<div class="line"><span>剩余 体力</span><span>' + S.stamina + '</span></div>' +
+      (S.unwell ? '<div class="line"><span>💔 体调不良</span><span>伤害减半</span></div>' : '') +
+      '<div class="line total"><span>你的打分总计</span><span>' + total + '</span></div>' +
+      '<div class="line rival"><span>对手打分总计（月岛 ルナ）</span><span>' + S.rival + '</span></div>';
+
+    showScreen('screen-result');
+    if(win) launchConfetti();
+  }
+
+  /* ================= 界面切换 ================= */
+  function showScreen(id){
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    $(id).classList.add('active');
+    window.scrollTo(0,0);
+  }
+  let idolPage = 0;
+  const IDOLS_PER_PAGE = 5;
+  function renderIdolSelect(reset){
+    if(reset) idolPage = 0;
+    const totalPages = Math.max(1, Math.ceil(IDOLS.length / IDOLS_PER_PAGE));
+    idolPage = Math.max(0, Math.min(idolPage, totalPages - 1));
+    const slice = IDOLS.slice(idolPage * IDOLS_PER_PAGE, idolPage * IDOLS_PER_PAGE + IDOLS_PER_PAGE);
+    const grid = $('idol-grid');
+    grid.innerHTML = '';
+    slice.forEach(idol => {
+      const a = ATTRS[idol.color];
+      const perkTxt = idol.skillText || (idol.start.focus ? '🎯 起手集中 +' + idol.start.focus
+        : idol.start.tune ? '🎵 起手好调 +' + idol.start.tune
+        : '🔥 起手元气 +' + idol.start.vigor);
+      const el = document.createElement('div');
+      el.className = 'idol-pick';
+      el.style.borderColor = a.color;
+      el.innerHTML =
+        (idol.img
+          ? '<div class="pick-avatar"><img src="' + idol.img + '" alt="' + idol.name + '"></div>'
+          : '<div class="pick-avatar" style="background:' + a.color + '33">' + idol.icon + '</div>') +
+        '<h3>' + idol.name + ' <span class="type-chip">' + idol.type + '</span></h3>' +
+        '<div class="pick-sub">' + idol.romaji + '</div>' +
+        '<span class="pick-color" style="background:' + a.dark + '">得意色 ' + a.icon + a.label + '</span>' +
+        '<p>' + idol.desc + '</p>' +
+        '<div class="pick-perk">' + perkTxt + '</div>';
+      el.addEventListener('click', () => startGame(idol));
+      grid.appendChild(el);
+    });
+    $('idol-prev').disabled = idolPage <= 0;
+    $('idol-next').disabled = idolPage >= totalPages - 1;
+  }
+
+  function renderIdolAvatar(){
+    const idol = S.idol;
+    const av = $('you-avatar');
+    av.innerHTML = idol.img ? '<img src="' + idol.img + '" alt="' + idol.name + '">' : idol.icon;
+    $('you-name').textContent = idol.name;
+  }
+
+  function startGame(idol){
+    newGame(idol);
+    renderIdolAvatar();
+    drawCandidates();
+    S.over = false;
+    const a = ATTRS[idol.color];
+    const wa = ATTRS[wheelAttr()];
+    addLog('🎬 养成开始！' + idol.name + ' · 得意色 <b>' + a.icon + a.label + '</b>，轮盘色 <b>' + wa.icon + wa.label + '</b>' + (wheelAttr()===idol.color ? '（得意！本回合×1.5）' : ''));
+    renderAll();
+    renderCards();
+    showScreen('screen-game');
+  }
+
+  /* ================= 装饰 ================= */
+  function makePetals(){
+    const chars = ['🌸','🌸','🌸','🎵','✨','🌷','❀'];
+    const wrap = $('petals');
+    for(let i=0;i<10;i++){
+      const p = document.createElement('span');
+      p.className = 'petal';
+      p.textContent = chars[i % chars.length];
+      p.style.left = (Math.random()*100) + '%';
+      p.style.fontSize = (12 + Math.random()*16) + 'px';
+      p.style.animationDuration = (9 + Math.random()*9) + 's';
+      p.style.animationDelay = (Math.random()*10) + 's';
+      wrap.appendChild(p);
+    }
+  }
+  function launchConfetti(){
+    const c = $('confetti');
+    c.innerHTML = '';
+    const colors = ['#ff7eb9','#5aa9ff','#ffb64d','#ff5c9d','#3d8bfd','#ffd700'];
+    for(let i=0;i<60;i++){
+      const s = document.createElement('span');
+      s.style.left = (Math.random()*100) + '%';
+      s.style.background = colors[i % colors.length];
+      s.style.animationDuration = (2.5 + Math.random()*2.5) + 's';
+      s.style.animationDelay = (Math.random()*0.8) + 's';
+      c.appendChild(s);
+    }
+    setTimeout(() => { c.innerHTML=''; }, 6000);
+  }
+
+  /* ================= 绑定 ================= */
+  $('btn-start').addEventListener('click', () => { renderIdolSelect(true); showScreen('screen-select'); });
+  $('btn-back-start').addEventListener('click', () => showScreen('screen-start'));
+  $('btn-again').addEventListener('click', () => { $('confetti').innerHTML=''; renderIdolSelect(true); showScreen('screen-select'); });
+  $('idol-prev').addEventListener('click', () => { idolPage--; renderIdolSelect(false); });
+  $('idol-next').addEventListener('click', () => { idolPage++; renderIdolSelect(false); });
+  $('btn-home').addEventListener('click', () => { $('confetti').innerHTML=''; showScreen('screen-start'); });
+  $('rest-btn').addEventListener('click', rest);
+  $('deck-btn').addEventListener('click', openDeck);
+  $('deck-close').addEventListener('click', closeDeck);
+  $('deck-overlay').addEventListener('click', (e) => { if(e.target.id === 'deck-overlay') closeDeck(); });
+
+  makePetals();
+})();
+</script>
+</body>
+</html>
