@@ -370,34 +370,86 @@
   .stock-label{ color:#fff; font-weight:800; letter-spacing:1px; background:rgba(0,0,0,.28); padding:8px 18px; border-radius:999px; }
 
   @media (max-width:640px){
-    .ring{ width:86px; height:86px; }
-    .ring::after{ inset:12px; }
-    .ring-center{ inset:12px; }
-    .ring-center .n{ font-size:1.35rem; }
-    .ring-needle{ height:34px; }
-    .ring-box{ top:12px; left:10px; }
-    .ring-note{ font-size:.66rem; padding:3px 9px; }
-    .score-box{ width:calc(100vw - 210px); top:14px; }
-    .score-line .who{ width:auto; min-width:36px; font-size:.76rem; }
-    .who-avatar{ width:34px; height:34px; font-size:1.1rem; }
+    /* ===== 游戏主屏 · 移动端重排 ===== */
+    #screen-game{ overflow:hidden; }
+    .ring{ width:72px; height:72px; }
+    .ring::after{ inset:10px; }
+    .ring-center{ inset:10px; }
+    .ring-center .n{ font-size:1.1rem; }
+    .ring-needle{ height:26px; }
+    .ring-box{ top:10px; left:10px; }
+    .ring-note{ font-size:.62rem; padding:3px 8px; }
+
+    .score-box{ top:92px; left:10px; right:10px; width:auto; transform:none; gap:6px; }
+    .score-line .who{ min-width:36px; font-size:.76rem; }
+    .who-avatar{ width:32px; height:32px; font-size:1.05rem; }
     .who-name{ font-size:.56rem; max-width:42px; }
-    .score-num{ min-width:52px; font-size:.9rem; }
-    #screen-game .bars{ top:12px; right:8px; min-width:96px; }
+    .score-track{ height:16px; }
+    .score-num{ min-width:50px; font-size:.9rem; }
+
+    #screen-game .bars{ top:10px; right:10px; width:132px; min-width:0; gap:5px; }
     #screen-game .bar-row{ gap:4px; font-size:.62rem; }
     #screen-game .bar{ height:10px; }
-    #screen-game .bar-val{ min-width:26px; }
-    .hud-note{ top:126px; left:10px; right:10px; max-width:none; gap:4px; }
+    #screen-game .bar-val{ min-width:24px; }
+
+    .hud-note{ top:170px; left:10px; right:10px; max-width:none; gap:4px; }
     .hud-note .mult-note{ font-size:.72rem; }
     .hud-note .rival-hint{ font-size:.68rem; }
-    .mid-area{ left:70px; right:10px; top:176px; bottom:292px; }
+
     .side-buffs{ left:6px; gap:7px; }
     .buff-chip{ width:46px; padding:8px 2px; border-radius:12px; }
     .buff-chip .ic{ font-size:.24rem; }
     .buff-chip .vl{ font-size:.95rem; }
-    .hand-bottom .cards{ gap:8px; }
-    .hand-bottom .card{ padding:10px 12px; min-height:96px; }
-    .hand-bottom .card .cname{ font-size:1rem; }
-    .hand-bottom .card .cdesc{ font-size:.76rem; }
+
+    .mid-area{ left:60px; right:8px; top:212px; bottom:250px; }
+
+    .hand-bottom{ padding:8px 8px calc(8px + env(safe-area-inset-bottom)); }
+    .hand-bottom .hand-title{ margin:0 0 8px; font-size:.92rem; }
+    .hand-bottom .cards{
+      display:flex; flex-wrap:nowrap; overflow-x:auto;
+      -webkit-overflow-scrolling:touch; scroll-snap-type:x mandatory;
+      gap:10px; padding:2px 4px 6px;
+    }
+    .hand-bottom .card{
+      flex:0 0 auto; width:min(60vw, 236px); min-height:112px;
+      padding:12px 14px; scroll-snap-align:center;
+    }
+    .hand-bottom .card .cname{ font-size:1.05rem; }
+    .hand-bottom .card .cdesc{ font-size:.78rem; }
+    .hand-bottom .card .ccost{ font-size:.72rem; padding:4px 10px; top:12px; right:12px; }
+    .hand-bottom .card .tag{ font-size:.66rem; }
+    .rest-btn{ width:48px; height:48px; }
+    .deck-btn{ width:34px; height:34px; }
+
+    /* ===== 选角屏 · 单列横向卡片 ===== */
+    .idol-carousel{ gap:8px; margin:16px 0; }
+    .page-btn{ width:44px; height:44px; font-size:1.2rem; }
+    .page-btn span{ font-size:.5rem; }
+    .idol-grid{ grid-template-columns:1fr; gap:10px; }
+    .idol-pick{
+      display:grid;
+      grid-template-columns:60px 1fr;
+      grid-template-areas:"avatar name" "avatar sub" "avatar color" "avatar desc" "avatar perk";
+      column-gap:14px; row-gap:2px;
+      align-items:center; text-align:left; padding:14px;
+    }
+    .idol-pick .pick-avatar{ grid-area:avatar; width:56px; height:56px; margin:0; font-size:1.8rem; align-self:start; }
+    .idol-pick h3{ grid-area:name; font-size:.92rem; }
+    .idol-pick .pick-sub{ grid-area:sub; font-size:.62rem; }
+    .idol-pick .pick-color{ grid-area:color; justify-self:start; font-size:.62rem; margin-top:4px; }
+    .idol-pick p{ grid-area:desc; font-size:.68rem; margin-top:4px; }
+    .idol-pick .pick-perk{ grid-area:perk; font-size:.64rem; margin-top:4px; }
+
+    /* ===== 牌库弹窗 · 全屏 ===== */
+    .deck-panel{ width:100%; height:100%; max-height:none; border-radius:0; padding:14px 16px; }
+    .deck-title{ font-size:1.15rem; }
+    .deck-grid{ grid-template-columns:1fr; gap:10px; }
+  }
+
+  /* 触屏设备：禁用卡牌悬停位移（避免 sticky hover） */
+  @media (hover:none){
+    .card:hover{ transform:none; box-shadow:var(--shadow-sm); }
+    .idol-pick:hover{ transform:none; }
   }
 </style>
 </head>
