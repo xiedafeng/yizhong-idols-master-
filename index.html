@@ -5,29 +5,34 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>一中偶像大师 · 学园养成篇（感性）</title>
 <link rel="stylesheet" href="style.css">
+<link rel="preload" as="image" href="background/1781538248015-cutout.webp">
+<link rel="preload" as="image" href="background/1781538664565-cutout.webp">
+<link rel="preload" as="image" href="background/1781538976455-cutout.webp">
+<link rel="preload" as="image" href="background/1781539174191-cutout.webp">
+<link rel="preload" as="font" type="font/woff2" href="fonts/hero-brush.woff2" crossorigin>
 </head>
 <body>
   <div class="petals" id="petals"></div>
+  <div class="screen-bg" id="screen-bg"></div>
 
   <div class="app">
     <!-- 开场 -->
     <section class="screen active" id="screen-start">
+      <div class="start-idols" aria-hidden="true">
+        <img src="background/1781538248015-cutout.webp" width="1233" height="1600" alt="">
+        <img src="background/1781538664565-cutout.webp" width="1374" height="1600" alt="">
+        <img src="background/1781538976455-cutout.webp" width="1403" height="1600" alt="">
+        <img src="background/1781539174191-cutout.webp" width="1354" height="1600" alt="">
+      </div>
+
       <div class="start-inner">
-        <div class="hero">一中偶像大师</div>
+        <div class="hero"><span>一</span><span>中</span><span>偶</span><span>像</span><span>大</span><span>师</span></div>
         <div class="hero-sub">学园养成篇 · School Idol Producer</div>
 
-        <div class="rules">
-          <h4>📖 玩法说明</h4>
-          <b>① 12 周养成</b>：每回合随机抽 <b>3 张牌</b>（三选一）打出，累计 <b>打分</b> 与对手比拼。<br>
-          <b>② 两种牌</b>：<span class="tag a">A</span> 攻击牌（主要打分）、<span class="tag m">M</span> 支援牌（主要叠 buff）。<br>
-          <b>③ 三个 buff</b>：<b>集中</b>（每点 +1 伤害，加法）、<b>好调</b>（≥1 时伤害 ×1.5，每回合开始 -1）、<b>绝好调</b>（使好调变为 ×(1.5+0.1×好调数)）。<br>
-          <b>④ 出伤公式</b>：<b>(卡牌伤害 + 集中) × 好调倍率 × 颜色倍率</b>。<br>
-          <b>⑤ 颜色轮盘</b>：每回合轮转，轮到偶像得意色（唱）时本回合伤害 <b>×1.5</b>；颜色只在当回合出伤时生效，不累计。<br>
-          <b>⑥ 体力 / 元气</b>：打牌消耗先扣元气、不足扣体力；体力归零进入<b>体调不良</b>（伤害减半）。<br>
-          <b>⑦ 特殊</b>：<b>再动</b>（本回合可再打一张）、<b>抽牌 N</b>（下次抽牌多 N 张）。
+        <div class="start-actions">
+          <button class="btn rules-toggle" id="rules-toggle" type="button" aria-haspopup="dialog">📖 玩法说明</button>
+          <button class="btn" id="btn-start">选择偶像 ✨</button>
         </div>
-
-        <button class="btn" id="btn-start">选择偶像 ✨</button>
       </div>
     </section>
 
@@ -158,6 +163,22 @@
       </div>
     </div>
   </div>
+
+  <dialog class="rules-dialog" id="rules-dialog">
+    <div class="rules-dialog-head">
+      <span class="rules-dialog-title">📖 玩法说明</span>
+      <button class="rules-dialog-close" id="rules-dialog-close" type="button" aria-label="关闭">✕</button>
+    </div>
+    <div class="rules-dialog-body">
+      <b>① 12 周养成</b>：每回合随机抽 <b>3 张牌</b>（三选一）打出，累计 <b>打分</b> 与对手比拼。<br>
+      <b>② 两种牌</b>：<span class="tag a">A</span> 攻击牌（主要打分）、<span class="tag m">M</span> 支援牌（主要叠 buff）。<br>
+      <b>③ 三个 buff</b>：<b>集中</b>（每点 +1 伤害，加法）、<b>好调</b>（≥1 时伤害 ×1.5，每回合开始 -1）、<b>绝好调</b>（使好调变为 ×(1.5+0.1×好调数)）。<br>
+      <b>④ 出伤公式</b>：<b>(卡牌伤害 + 集中) × 好调倍率 × 颜色倍率</b>。<br>
+      <b>⑤ 颜色轮盘</b>：每回合轮转，轮到偶像得意色（唱）时本回合伤害 <b>×1.5</b>；颜色只在当回合出伤时生效，不累计。<br>
+      <b>⑥ 体力 / 元气</b>：打牌消耗先扣元气、不足扣体力；体力归零进入<b>体调不良</b>（伤害减半）。<br>
+      <b>⑦ 特殊</b>：<b>再动</b>（本回合可再打一张）、<b>抽牌 N</b>（下次抽牌多 N 张）。
+    </div>
+  </dialog>
 
 <script src="script.js"></script>
 </body>

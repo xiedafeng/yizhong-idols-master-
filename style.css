@@ -1,3 +1,11 @@
+@font-face{
+  font-family:"HeroBrush";
+  src:url("fonts/hero-brush.woff2") format("woff2");
+  font-weight:400;
+  font-style:normal;
+  font-display:swap;
+}
+
 :root{
   --pink:#ff7eb9; --pink-d:#e85b9d;
   --blue:#5aa9ff; --blue-d:#3d8bfd;
@@ -26,6 +34,14 @@ body{
 @keyframes fall{ 0%{ transform:translateY(-6vh) translateX(0) rotate(0);} 100%{ transform:translateY(108vh) translateX(60px) rotate(360deg);} }
 
 .app{ position:relative; z-index:2; max-width:1040px; margin:0 auto; padding:18px 16px 60px; }
+
+/* 开始 / 选角界面背景 */
+.screen-bg{ position:fixed; inset:0; z-index:1; pointer-events:none;
+  background-position:center; background-size:cover; background-repeat:no-repeat;
+  opacity:0; transition:opacity .6s ease; }
+.screen-bg.show{ opacity:1; }
+.screen-bg::after{ content:''; position:absolute; inset:0;
+  background:linear-gradient(160deg, rgba(255,247,240,.58) 0%, rgba(253,238,246,.46) 55%, rgba(238,246,255,.56) 100%); }
 .screen{ display:none; }
 .screen.active{ display:block; animation:pop .45s cubic-bezier(.2,.9,.3,1.2); }
 @keyframes pop{ from{ opacity:0; transform:translateY(12px) scale(.98);} to{ opacity:1; transform:none;} }
@@ -204,7 +220,60 @@ body{
 .btn.ghost{ background:#fff; color:var(--pink-d); box-shadow:var(--shadow-sm); }
 
 /* 开场屏 */
+#screen-start{ position:relative; min-height:calc(100vh - 78px); }
+#screen-start.active{ display:flex; flex-direction:column; align-items:center; justify-content:center; }
+#screen-start .hero{
+  font-family:"HeroBrush","STXingkai","华文行楷","KaiTi","楷体",cursive;
+  font-weight:400;
+  font-size:clamp(2.8rem, 9vw, 5.2rem);
+  line-height:1.15;
+  letter-spacing:2px;
+  background:none;
+  -webkit-background-clip:border-box;
+  background-clip:border-box;
+  color:#111;
+  -webkit-text-fill-color:#111;
+  text-shadow:0 2px 8px rgba(255,255,255,.45);
+}
+#screen-start .hero span{
+  display:inline-block;
+  clip-path:inset(-20px 100% -20px 0);
+  animation:heroWrite .45s cubic-bezier(.25,.8,.3,1) forwards;
+}
+#screen-start .hero span:nth-child(1){ animation-delay:.25s; }
+#screen-start .hero span:nth-child(2){ animation-delay:.37s; }
+#screen-start .hero span:nth-child(3){ animation-delay:.49s; }
+#screen-start .hero span:nth-child(4){ animation-delay:.61s; }
+#screen-start .hero span:nth-child(5){ animation-delay:.73s; }
+#screen-start .hero span:nth-child(6){ animation-delay:.85s; }
+@keyframes heroWrite{ to{ clip-path:inset(-20px -20px -20px -20px); } }
+@media (prefers-reduced-motion:reduce){
+  #screen-start .hero span{ animation:none; clip-path:none; }
+}
 .start-inner{ max-width:640px; margin:4vh auto 0; text-align:center; }
+#screen-start .start-inner{ width:100%; margin:0; }
+
+/* 开始界面右侧：四张透明立绘依次从右侧淡入 */
+.start-idols{ position:absolute; right:calc(-46px - max(0px, 50vw - 520px)); bottom:-28vh; width:min(58vw, 840px); height:80vh; z-index:0; pointer-events:none; }
+.start-idols img{
+  --x:0px; --y:0vh; --h:60vh; --rot:0deg; --d:0s;
+  position:absolute; right:var(--x); bottom:var(--y); height:var(--h); width:auto; max-width:none;
+  opacity:0; transform:translateX(220px) rotate(var(--rot));
+  filter:drop-shadow(-10px 14px 22px rgba(74,63,85,.22));
+  animation:startIdolIn .9s cubic-bezier(.2,.9,.3,1.15) forwards; animation-delay:var(--d);
+}
+@keyframes startIdolIn{ to{ opacity:1; transform:translateX(0) rotate(var(--rot)); } }
+.start-idols img:nth-child(1){ --x:clamp(380px, 35vw, 500px); --y:13vh; --h:44vh; --rot:-8deg; --d:.05s; z-index:1; }
+.start-idols img:nth-child(2){ --x:clamp(260px, 24vw, 340px); --y:8vh; --h:50vh; --rot:-3deg; --d:.15s; z-index:2; }
+.start-idols img:nth-child(3){ --x:clamp(135px, 12vw, 175px); --y:4vh; --h:56vh; --rot:3deg; --d:.25s; z-index:3; }
+.start-idols img:nth-child(4){ --x:0px; --y:-1vh; --h:60vh; --rot:7deg; --d:.35s; z-index:4; }
+#screen-start .start-inner{ position:relative; z-index:2; }
+@media (max-width:1179px){
+  .start-idols{ display:none; }
+}
+@media (prefers-reduced-motion:reduce){
+  .start-idols img{ animation-duration:.01s; animation-delay:0s; }
+}
 .hero{ font-size:2.6rem; font-weight:900; letter-spacing:2px; line-height:1.1; margin-bottom:6px;
   background:linear-gradient(135deg,#ff5c9d,#3d8bfd,#f59b1b); -webkit-background-clip:text; background-clip:text; color:transparent; }
 .hero-sub{ color:var(--ink-soft); font-weight:600; letter-spacing:2px; margin-bottom:20px; }
@@ -214,10 +283,21 @@ body{
 .idol-card h3{ font-size:1.1rem; }
 .idol-card p{ font-size:.8rem; color:var(--ink-soft); margin-top:4px; line-height:1.5; }
 .type-chip{ display:inline-block; font-size:.7rem; font-weight:800; color:#fff; background:linear-gradient(135deg,#b49bff,#7f6bf2); border-radius:999px; padding:3px 10px; margin-left:6px; }
-.rules{ background:#fff; border-radius:18px; padding:18px 22px; box-shadow:var(--shadow); text-align:left; font-size:.85rem; line-height:1.85; margin-bottom:22px; }
-.rules h4{ text-align:center; margin-bottom:8px; color:var(--pink-d); }
-.rules .tag{ display:inline-block; font-size:.62rem; font-weight:900; color:#fff; padding:1px 6px; border-radius:5px; }
-.rules .tag.a{ background:#ff5c5c; } .rules .tag.m{ background:#3cc06b; }
+/* 玩法说明：默认收起，点击弹出完整内容 */
+.start-actions{ display:flex; flex-direction:column; align-items:center; gap:12px; margin-bottom:22px; }
+.start-actions .btn{ min-width:200px; }
+
+.rules-dialog{ position:fixed; inset:0; margin:auto; height:fit-content; width:min(92vw, 620px); max-height:82vh;
+  padding:0; border:none; border-radius:18px; background:#fff; color:var(--ink); box-shadow:0 24px 70px rgba(0,0,0,.32); }
+.rules-dialog::backdrop{ background:rgba(74,63,85,.52); }
+.rules-dialog-head{ display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid #f0e6ef; }
+.rules-dialog-title{ font-size:1.1rem; font-weight:900; color:var(--pink-d); }
+.rules-dialog-close{ border:none; background:#f3ebf3; width:34px; height:34px; border-radius:10px;
+  cursor:pointer; font-size:1rem; color:var(--ink-soft); transition:background .15s ease; }
+.rules-dialog-close:hover{ background:#e8dce8; }
+.rules-dialog-body{ padding:16px 22px 22px; font-size:.85rem; line-height:1.85; overflow-y:auto; max-height:calc(82vh - 78px); }
+.rules-dialog-body .tag{ display:inline-block; font-size:.62rem; font-weight:900; color:#fff; padding:1px 6px; border-radius:5px; }
+.rules-dialog-body .tag.a{ background:#ff5c5c; } .rules-dialog-body .tag.m{ background:#3cc06b; }
 
 /* 选角屏 */
 #screen-select .start-inner{ max-width:1040px; }

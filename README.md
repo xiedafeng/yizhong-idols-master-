@@ -28,6 +28,7 @@ script.js           游戏逻辑（抽牌、出伤、结算、配置加载）
 package.json        启动脚本
 <角色名>/config.json  角色配置（名字、擅长色、技能、格言、效果）
 <角色名>/<图片>       角色头像
+background/         开始/选角背景图与开始界面右侧入场立绘（*-cutout.webp）
 bgm/                BGM 目录（预留）
 ```
 

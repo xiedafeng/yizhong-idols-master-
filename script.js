@@ -567,9 +567,24 @@
   }
 
   /* ================= 界面切换 ================= */
+  const SCREEN_BG = {
+    'screen-start': 'background/桂平市第一中学.jpg',
+    'screen-select': 'background/桂平市第一中学2.jpg',
+  };
+  function setScreenBg(id){
+    const el = $('screen-bg');
+    const src = SCREEN_BG[id];
+    if(src){
+      el.style.backgroundImage = 'url("' + encodeURI(src) + '")';
+      el.classList.add('show');
+    } else {
+      el.classList.remove('show');
+    }
+  }
   function showScreen(id){
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     $(id).classList.add('active');
+    setScreenBg(id);
     window.scrollTo(0,0);
   }
   let idolPage = 0;
@@ -673,5 +688,11 @@
   $('deck-close').addEventListener('click', closeDeck);
   $('deck-overlay').addEventListener('click', (e) => { if(e.target.id === 'deck-overlay') closeDeck(); });
 
+  const rulesDialog = $('rules-dialog');
+  $('rules-toggle').addEventListener('click', () => rulesDialog.showModal());
+  $('rules-dialog-close').addEventListener('click', () => rulesDialog.close());
+  rulesDialog.addEventListener('click', (e) => { if(e.target === rulesDialog) rulesDialog.close(); });
+
+  setScreenBg('screen-start');
   makePetals();
 })();
