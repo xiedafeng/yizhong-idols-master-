@@ -1,0 +1,14 @@
+{
+  "name": "叶锦宝",
+  "romaji": "Jinbao",
+  "type": "感性",
+  "specialty": "唱",
+  "color": "sing",
+  "skill": "开局 集中 +6",
+  "motto": "既然是级长，就要拿第一。",
+  "effects": {
+    "startFocus": 6
+  },
+  "description": "来自浔郡中学的一级教师，深受学生喜爱（存疑），教过非常多非常优秀的学生，级长。",
+  "image": "jinbao.png"
+}

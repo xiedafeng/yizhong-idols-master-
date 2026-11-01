@@ -1,0 +1,14 @@
+{
+  "name": "王海平",
+  "romaji": "Wanghaiping",
+  "type": "感性",
+  "specialty": "舞",
+  "color": "dance",
+  "skill": "开局 元气 +68",
+  "motto": "一字一句，把每个学生拉出迷雾。",
+  "effects": {
+    "startVigor": 68
+  },
+  "description": "王海平老师，我还记得你，一字一句，把我拉出迷雾里！",
+  "image": "wanghaiping.jpg"
+}

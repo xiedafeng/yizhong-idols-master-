@@ -1,0 +1,21 @@
+{
+  "name": "yizhong-idols-master",
+  "version": "1.0.0",
+  "description": "《一中偶像大师》是一款完全由AI开发的校园偶像养成游戏，游戏中的角色、剧情、音乐、音效等均由AI生成，玩家可以自由选择角色，参与剧情，体验校园生活的点点滴滴。",
+  "private": true,
+  "scripts": {
+    "start": "python -m http.server 8080",
+    "check": "node --check script.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xiedafeng/yizhong-idols-master-.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xiedafeng/yizhong-idols-master-/issues"
+  },
+  "homepage": "https://github.com/xiedafeng/yizhong-idols-master-#readme"
+}

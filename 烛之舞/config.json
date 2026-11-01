@@ -1,0 +1,14 @@
+{
+  "name": "烛之舞",
+  "romaji": "Zhuzhiwu",
+  "type": "感性",
+  "specialty": "舞",
+  "color": "dance",
+  "skill": "蓝色回合（舞）可多打一张 · 每回合限一次",
+  "motto": "夜缒而出，一言退秦师。",
+  "effects": {
+    "danceExtraAction": true
+  },
+  "description": "秦、晋围郑，郑既知亡矣。若亡郑而有益于君，敢以烦执事。越国以鄙远，君知其难也，焉用亡郑以陪邻？",
+  "image": "zhuzhiwu.jpg"
+}

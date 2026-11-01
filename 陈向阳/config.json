@@ -1,0 +1,14 @@
+{
+  "name": "陈向阳",
+  "romaji": "Xiangyang",
+  "type": "感性",
+  "specialty": "唱",
+  "color": "sing",
+  "skill": "最后 3 回合开始时，分数 +15（受集中、好调影响）",
+  "motto": "教给学生的，不只是知识，还有站上舞台的勇气。",
+  "effects": {
+    "finalBonus": 15
+  },
+  "description": "来自浔郡中学的特级教师，深受学生喜爱，教过非常多非常优秀的学生，哦对了，陈八分钱。",
+  "image": "xiangyang.jpg"
+}

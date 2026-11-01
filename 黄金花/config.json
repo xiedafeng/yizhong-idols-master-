@@ -1,0 +1,14 @@
+{
+  "name": "级长黄金花",
+  "romaji": "Huangjinhua",
+  "type": "感性",
+  "specialty": "看",
+  "color": "visual",
+  "skill": "黄色回合（看）开始时，集中 +3",
+  "motto": "我是黄金花，不是谁的影子。",
+  "effects": {
+    "visualFocusBonus": 3
+  },
+  "description": "不要把我当czw了，想AI搞什么东西 我没给他看哈哈哈，怕他用AI整我。",
+  "image": "huangjinhua.jpg"
+}

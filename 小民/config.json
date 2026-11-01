@@ -1,0 +1,16 @@
+{
+  "name": "小民",
+  "romaji": "Xiaomin",
+  "type": "感性",
+  "specialty": "唱",
+  "color": "sing",
+  "skill": "开局 集中 +9 · 好调 +8 · 最后一回合 分数 +5",
+  "motto": "每每与共，知行合一，民大，牛逼！",
+  "effects": {
+    "startFocus": 9,
+    "startTune": 8,
+    "lastTurnBonus": 5
+  },
+  "description": "每每与共，知行合一，民大，牛逼！",
+  "image": "xiaomin.jpg"
+}
