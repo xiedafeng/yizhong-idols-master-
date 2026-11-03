@@ -2,9 +2,10 @@
   "name": "龙奶奶龙",
   "romaji": "Longnainailong",
   "type": "感性",
+  "rarity": "SR",
   "specialty": "看",
   "color": "visual",
-  "skill": "黄色回合（看）可多打一张 · 每回合限一次",
+  "skill": "黄色回合（看）可多打一张 · 整局限一次",
   "motto": "你可以说我老，但不能说我菜。",
   "effects": {
     "visualExtraAction": true

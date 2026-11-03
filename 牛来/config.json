@@ -1,0 +1,16 @@
+{
+  "name": "牛来",
+  "romaji": "Niulai",
+  "type": "感性",
+  "rarity": "SR",
+  "specialty": "看",
+  "color": "visual",
+  "skill": "黄色回合 · 集中效果×2，好调倍率变为 (1.5 + 好调 × 0.1)",
+  "motto": "牛来！",
+  "effects": {
+    "visualFocusDouble": true,
+    "visualGreatTune": true
+  },
+  "description": "牛来！",
+  "image": "bili_poster-1792730196055.png"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "浔高袋鼠",
+  "romaji": "Xungaodaishu",
+  "type": "感性",
+  "rarity": "SR",
+  "specialty": "看",
+  "color": "visual",
+  "skill": "黄色回合 · 好调倍率变为 (1.5 + 好调 × 0.2)",
+  "motto": "一中你个老牧师，胆子真是肥嘟嘟的",
+  "effects": {
+    "visualTuneDouble": true
+  },
+  "description": "一中你个老牧师，胆子真是肥嘟嘟的",
+  "image": "Screenshot_20261103_225456.jpg"
+}

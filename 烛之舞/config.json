@@ -2,9 +2,10 @@
   "name": "烛之舞",
   "romaji": "Zhuzhiwu",
   "type": "感性",
+  "rarity": "SR",
   "specialty": "舞",
   "color": "dance",
-  "skill": "蓝色回合（舞）可多打一张 · 每回合限一次",
+  "skill": "蓝色回合（舞）可多打一张 · 整局限一次",
   "motto": "夜缒而出，一言退秦师。",
   "effects": {
     "danceExtraAction": true

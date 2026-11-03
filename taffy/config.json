@@ -1,0 +1,15 @@
+{
+  "name": "taffy",
+  "romaji": "Taffy",
+  "type": "感性",
+  "rarity": "SR",
+  "specialty": "唱",
+  "color": "sing",
+  "skill": "红色回合（唱）可多打一张 · 整局限一次",
+  "motto": "命中间的的一横是为了隔开人和OP喵",
+  "effects": {
+    "singExtraAction": true
+  },
+  "description": "命中间的的一横是为了隔开人和OP喵",
+  "image": "bili_poster-1792412554004.png"
+}

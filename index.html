@@ -33,6 +33,8 @@
           <button class="btn rules-toggle" id="rules-toggle" type="button" aria-haspopup="dialog">📖 玩法说明</button>
           <button class="btn" id="btn-start">选择偶像 ✨</button>
         </div>
+
+        <div class="scholarship-bank" id="scholarship-bank">🪙 一中奖学金 <b id="scholarship-total">0</b></div>
       </div>
     </section>
 
@@ -136,6 +138,18 @@
   <div class="confetti" id="confetti"></div>
   <div class="card-tip" id="card-tip"></div>
 
+  <!-- 背景音乐控制 -->
+  <div class="bgm-dock" id="bgm-dock">
+    <button class="bgm-toggle" id="bgm-toggle" type="button" aria-label="关闭背景音乐" aria-pressed="true" title="播放 / 暂停背景音乐">
+      <span id="bgm-icon">🔊</span>
+    </button>
+    <div class="bgm-meta">
+      <span class="bgm-label">BGM</span>
+      <span class="bgm-name" id="bgm-name">关注塔菲谢谢喵</span>
+    </div>
+    <button class="bgm-next" id="bgm-next" type="button" aria-label="切换下一首" title="切换下一首">⏭</button>
+  </div>
+
   <!-- 牌库查看 -->
   <div class="deck-overlay" id="deck-overlay">
     <div class="deck-panel">
@@ -175,11 +189,12 @@
       <b>③ 三个 buff</b>：<b>集中</b>（每点 +1 伤害，加法）、<b>好调</b>（≥1 时伤害 ×1.5，每回合开始 -1）、<b>绝好调</b>（使好调变为 ×(1.5+0.1×好调数)）。<br>
       <b>④ 出伤公式</b>：<b>(卡牌伤害 + 集中) × 好调倍率 × 颜色倍率</b>。<br>
       <b>⑤ 颜色轮盘</b>：每回合轮转，轮到偶像得意色（唱）时本回合伤害 <b>×1.5</b>；颜色只在当回合出伤时生效，不累计。<br>
-      <b>⑥ 体力 / 元气</b>：打牌消耗先扣元气、不足扣体力；体力归零进入<b>体调不良</b>（伤害减半）。<br>
+      <b>⑥ 体力 / 元气</b>：打牌消耗先扣元气、不足扣体力；体力归零进入<b>体调不良</b>，可用「休息」恢复体力解除。<br>
       <b>⑦ 特殊</b>：<b>再动</b>（本回合可再打一张）、<b>抽牌 N</b>（下次抽牌多 N 张）。
     </div>
   </dialog>
 
+<script src="cards.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
