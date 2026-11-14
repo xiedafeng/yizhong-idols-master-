@@ -120,11 +120,6 @@
       <div class="select-scene">
         <div class="select-bgtext" id="select-bgtext" aria-hidden="true">JINBAO</div>
 
-        <div class="select-stage" aria-hidden="true">
-          <div class="select-glow"></div>
-          <div class="select-art" id="select-art"></div>
-        </div>
-
         <header class="select-top">
           <button class="round-btn" id="btn-back-start" type="button" aria-label="返回主页">‹</button>
           <div class="select-identity">
@@ -138,41 +133,44 @@
           <button class="round-btn" id="select-help" type="button" aria-label="玩法说明">❔</button>
         </header>
 
-        <div class="select-body">
-          <div class="stat-rings" id="select-stats" aria-label="能力相性"></div>
+        <div class="select-stage" aria-hidden="true">
+          <div class="select-glow"></div>
+          <div class="select-art" id="select-art"></div>
+        </div>
 
-          <div class="plan-card">
-            <div class="plan-head">
-              <span class="plan-badge">方案</span>
-              <div class="plan-head-text">
-                <b id="select-plan-type">感性</b>
-                <small>得意色 · <span id="select-plan-color">🎤 唱</span></small>
+        <div class="select-dock">
+          <span class="dock-handle" aria-hidden="true"></span>
+
+          <div class="select-body">
+            <div class="stat-rings" id="select-stats" aria-label="能力相性"></div>
+
+            <div class="plan-card">
+              <div class="plan-head">
+                <span class="plan-badge">方案</span>
+                <div class="plan-head-text">
+                  <b id="select-plan-type">感性</b>
+                  <small>得意色 · <span id="select-plan-color">🎤 唱</span></small>
+                </div>
+                <button class="plan-detail" id="select-detail" type="button">详情 ›</button>
               </div>
-              <span class="plan-chip" id="select-plan-chip">SR</span>
-            </div>
-            <div class="plan-main">
-              <div class="plan-mini" id="select-plan-mini" aria-hidden="true"></div>
               <div class="plan-info">
-                <b id="select-plan-name">叶锦宝</b>
                 <p id="select-plan-skill">开局 集中 +6</p>
               </div>
+              <div class="plan-tags" id="select-plan-tags"></div>
             </div>
-            <div class="plan-tags" id="select-plan-tags"></div>
-            <p class="plan-motto" id="select-motto"></p>
-            <p class="plan-desc" id="select-desc"></p>
           </div>
-        </div>
 
-        <div class="select-actions">
-          <button class="big-action primary" id="select-start" type="button">开始养成</button>
-          <button class="big-action" id="select-random" type="button">随机换一位 🎲</button>
-        </div>
+          <div class="select-actions">
+            <button class="big-action primary" id="select-start" type="button">开始养成</button>
+            <button class="big-action" id="select-random" type="button">随机换一位 🎲</button>
+          </div>
 
-        <div class="roster-head">
-          <span class="roster-title">全体偶像</span>
-          <span class="roster-note" id="select-count">1 / 12</span>
+          <div class="roster-head">
+            <span class="roster-title">全体偶像</span>
+            <span class="roster-note" id="select-count">1 / 12</span>
+          </div>
+          <div class="roster" id="idol-grid" role="listbox" aria-label="偶像列表"></div>
         </div>
-        <div class="roster" id="idol-grid" role="listbox" aria-label="偶像列表"></div>
 
         <nav class="bottom-nav select-nav" aria-label="主导航">
           <button class="nav-item" type="button" data-nav="home">
@@ -193,83 +191,107 @@
 
     <!-- 主游戏 -->
     <section class="screen" id="screen-game">
-      <!-- 左上：颜色轮盘 -->
+      <div class="game-bg" id="game-bg" aria-hidden="true"></div>
+
+      <!-- 左上：剩余周数 / 颜色轮盘 -->
       <div class="ring-box">
         <div class="ring" id="ring">
-          <div class="ring-center"><span class="n" id="ring-week">1</span><span class="t">/12 周</span></div>
+          <div class="ring-center"><span class="n" id="ring-week">12</span><span class="t">剩余周</span></div>
           <div class="ring-needle" id="ring-needle"></div>
         </div>
         <div class="ring-note" id="ring-note">🎤 唱 ×1.5</div>
       </div>
 
-      <!-- 顶部中央：比分 -->
-      <div class="score-box glass">
-        <div class="score-line">
-          <span class="who you"><span class="who-avatar" id="you-avatar"></span><span class="who-name" id="you-name">你</span></span>
-          <div class="score-track"><div class="fill you" id="you-fill"></div></div>
-          <span class="score-num" id="you-score">0 分</span>
+      <!-- 右上：体力 / 元气 -->
+      <div class="bars">
+        <div class="stat-badge stamina">
+          <span class="stat-ic">❤️</span>
+          <div class="stat-body">
+            <b id="stamina-val">100</b>
+            <div class="bar"><div class="bar-fill stamina" id="stamina-fill"></div></div>
+          </div>
         </div>
-        <div class="score-line">
-          <span class="who foe">对手</span>
-          <div class="score-track"><div class="fill foe" id="foe-fill"></div></div>
-          <span class="score-num" id="foe-score">0 分</span>
+        <div class="stat-badge vigor">
+          <span class="stat-ic">🔥</span>
+          <div class="stat-body">
+            <b id="vigor-val">0</b>
+            <div class="bar"><div class="bar-fill vigor" id="vigor-fill"></div></div>
+          </div>
         </div>
       </div>
 
-      <!-- 右上：体力 / 元气 -->
-      <div class="bars glass">
-        <div class="bar-row">
-          <div class="bar-label">❤️ 体力</div>
-          <div class="bar"><div class="bar-fill stamina" id="stamina-fill"></div></div>
-          <div class="bar-val" id="stamina-val">100</div>
+      <!-- 顶部中央：比赛排名 + 比分 -->
+      <div class="score-box">
+        <div class="rank-strip">
+          <div class="rank-item you" id="rank-you">
+            <span class="rank-badge" id="rank-you-badge">1st</span>
+            <span class="who-avatar" id="you-avatar"></span>
+            <span class="who-name" id="you-name">你</span>
+          </div>
+          <span class="rank-vs">VS</span>
+          <div class="rank-item foe" id="rank-foe">
+            <span class="who-name">对手</span>
+            <span class="rank-avatar">🌙</span>
+            <span class="rank-badge" id="rank-foe-badge">2nd</span>
+          </div>
         </div>
-        <div class="bar-row">
-          <div class="bar-label">🔥 元气</div>
-          <div class="bar"><div class="bar-fill vigor" id="vigor-fill"></div></div>
-          <div class="bar-val" id="vigor-val">0</div>
+        <div class="score-bars">
+          <div class="score-line">
+            <span class="score-tag you">我方</span>
+            <div class="score-track"><div class="fill you" id="you-fill"></div></div>
+            <span class="score-num" id="you-score">0 分</span>
+          </div>
+          <div class="score-line">
+            <span class="score-tag foe">对手</span>
+            <div class="score-track"><div class="fill foe" id="foe-fill"></div></div>
+            <span class="score-num" id="foe-score">0 分</span>
+          </div>
         </div>
+        <div class="score-gain" id="score-gain" aria-hidden="true"></div>
       </div>
 
       <!-- 加成与提示 -->
-      <div class="hud-note glass">
+      <div class="hud-note">
         <div class="mult-note" id="mult-note">当前加成：🎯 伤害 +0 ｜ 🎵 无</div>
         <div class="rival-hint" id="rival-hint">对手正在努力训练中…</div>
       </div>
 
       <!-- buff -->
       <div class="side-buffs">
-        <div class="buff-chip focus"><span class="ic">🎯</span><b>集中</b><span class="vl" id="buff-focus">0</span></div>
-        <div class="buff-chip tune"><span class="ic">🎵</span><b>好调</b><span class="vl" id="buff-tune">0</span></div>
-        <div class="buff-chip great"><span class="ic">🌟</span><b>绝好调</b><span class="vl" id="buff-great">—</span></div>
+        <div class="buff-chip focus"><span class="ic">🎯</span><span class="lb">集中</span><b class="vl" id="buff-focus">0</b></div>
+        <div class="buff-chip tune"><span class="ic">🎵</span><span class="lb">好调</span><b class="vl" id="buff-tune">0</b></div>
+        <div class="buff-chip great"><span class="ic">🌟</span><span class="lb">绝好调</span><b class="vl" id="buff-great">—</b></div>
       </div>
 
-      <!-- 中部：舞台立绘 + 日志 -->
+      <!-- 中部：舞台信息 + Live 日志 -->
       <div class="mid-area">
-        <div class="stage-panel glass" id="stage-panel">
+        <div class="mid-idol" id="mid-idol" aria-hidden="true"></div>
+        <div class="stage-panel" id="stage-panel">
           <div class="stage-idol" id="stage-idol"></div>
           <div class="stage-info">
             <div class="stage-name" id="stage-name">偶像</div>
             <div class="stage-meta" id="stage-meta">感性 · 得意色</div>
             <div class="stage-skill" id="stage-skill"></div>
           </div>
+          <span class="stage-live">LIVE</span>
         </div>
-        <div class="log glass" id="log"></div>
+        <div class="log" id="log"></div>
       </div>
 
-      <!-- 底部：卡牌 -->
+      <!-- 底部：手牌 -->
       <div class="hand-bottom">
         <div class="hand-bar">
           <div class="hand-title" id="hand-title">🎴 本回合抽卡 · 请 <span>三选一</span> 打出</div>
-          <div class="hand-tools">
-            <button class="deck-btn" id="deck-btn" type="button" title="查看牌库" aria-label="查看牌库">📚</button>
-            <button class="deck-btn" id="bgm-mini" type="button" title="播放 / 暂停背景音乐" aria-label="关闭背景音乐" aria-pressed="true"><span id="bgm-mini-icon">🔊</span></button>
-            <button class="rest-btn" id="rest-btn" type="button" title="休息一回合 · 体力 +8" aria-label="休息一回合，体力加八">
-              <span class="ic">❤️</span><span class="lb">休息</span>
-            </button>
-          </div>
         </div>
         <div class="hand-cards-wrap">
           <div class="cards" id="cards" aria-label="本回合手牌" tabindex="-1"></div>
+        </div>
+        <div class="hand-tools">
+          <button class="deck-btn" id="deck-btn" type="button" title="查看牌库" aria-label="查看牌库">📚</button>
+          <button class="deck-btn" id="bgm-mini" type="button" title="播放 / 暂停背景音乐" aria-label="关闭背景音乐" aria-pressed="true"><span id="bgm-mini-icon">🔊</span></button>
+          <button class="rest-btn" id="rest-btn" type="button" title="休息一回合 · 体力 +8" aria-label="休息一回合，体力加八">
+            <span class="ic">❤️</span><span class="lb">休息</span>
+          </button>
         </div>
       </div>
     </section>
@@ -353,6 +375,26 @@
       <b>⑤ 颜色轮盘</b>：每回合轮转，轮到偶像得意色（唱）时本回合伤害 <b>×1.5</b>；颜色只在当回合出伤时生效，不累计。<br>
       <b>⑥ 体力 / 元气</b>：打牌消耗先扣元气、不足扣体力；体力归零进入<b>体调不良</b>，可用「休息」恢复体力解除。<br>
       <b>⑦ 特殊</b>：<b>再动</b>（本回合可再打一张）、<b>抽牌 N</b>（下次抽牌多 N 张）。
+    </div>
+  </dialog>
+
+  <dialog class="rules-dialog idol-dialog" id="idol-dialog" aria-labelledby="idol-dialog-title">
+    <div class="rules-dialog-head">
+      <span class="rules-dialog-title" id="idol-dialog-title">偶像详情</span>
+      <button class="rules-dialog-close" id="idol-dialog-close" type="button" aria-label="关闭">✕</button>
+    </div>
+    <div class="rules-dialog-body idol-dialog-body">
+      <div class="idol-dialog-id">
+        <span class="sel-rarity" id="idol-dialog-rarity" data-rarity="SR">SR</span>
+        <div class="idol-dialog-id-text">
+          <b id="idol-dialog-name">叶锦宝</b>
+          <small id="idol-dialog-sub">JINBAO · 感性 · 得意色 唱</small>
+        </div>
+      </div>
+      <div class="idol-dialog-skill" id="idol-dialog-skill"></div>
+      <div class="plan-tags" id="idol-dialog-tags"></div>
+      <p class="idol-dialog-motto" id="idol-dialog-motto"></p>
+      <p class="idol-dialog-desc" id="idol-dialog-desc"></p>
     </div>
   </dialog>
 

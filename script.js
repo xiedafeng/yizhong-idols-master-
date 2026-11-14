@@ -148,7 +148,10 @@
     const id = typeof idOrIdol === 'string' ? idOrIdol : (idOrIdol && idOrIdol.id);
     if(!id) return false;
     if(unlockedIdols.indexOf(id) === -1){ unlockedIdols.push(id); saveUnlockedIdols(); }
-    if(document.body && document.body.dataset.screen === 'screen-select') renderIdolSelect(false);
+    if(document.body && document.body.dataset.screen === 'screen-select'){
+      renderIdolSelect(false);
+      centerActiveRoster(false);
+    }
     return true;
   }
   function showLockToast(idol){
@@ -405,6 +408,17 @@
     layer.appendChild(el);
     setTimeout(() => el.remove(), 1450);
   }
+  function showScoreGain(delta){
+    if(prefersReducedMotion() || document.body.dataset.screen !== 'screen-game') return;
+    const el = $('score-gain');
+    if(!el) return;
+    el.textContent = '+' + delta;
+    el.classList.remove('show');
+    void el.offsetWidth;
+    el.classList.add('show');
+    clearTimeout(el._gainTimer);
+    el._gainTimer = setTimeout(() => el.classList.remove('show'), 1300);
+  }
   function syncScoreFx(){
     if(!fxState.ready){
       fxState.you = S.totalScore;
@@ -414,7 +428,7 @@
       return;
     }
     if(document.body.dataset.screen === 'screen-game'){
-      if(S.totalScore > fxState.you) showScorePop('you', S.totalScore - fxState.you);
+      if(S.totalScore > fxState.you) showScoreGain(S.totalScore - fxState.you);
       if(S.rival > fxState.foe) showScorePop('foe', S.rival - fxState.foe);
       if(S.week !== fxState.week) showWeekBanner(S.week);
     }
@@ -462,6 +476,15 @@
     const mx = Math.max(300, S.totalScore, S.rival);
     $('you-fill').style.width = (S.totalScore/mx*100) + '%';
     $('foe-fill').style.width = (S.rival/mx*100) + '%';
+
+    const youLead = S.totalScore >= S.rival;
+    const rankYou = $('rank-you');
+    const rankFoe = $('rank-foe');
+    if(rankYou) rankYou.classList.toggle('leading', youLead);
+    if(rankFoe) rankFoe.classList.toggle('leading', !youLead);
+    if($('rank-you-badge')) $('rank-you-badge').textContent = youLead ? '1st' : '2nd';
+    if($('rank-foe-badge')) $('rank-foe-badge').textContent = youLead ? '2nd' : '1st';
+
     syncScoreFx();
     renderHandTitle();
 
@@ -478,12 +501,12 @@
   function renderRing(){
     const deg = (S.week - 1) * 30 + 15;   // 12 等分，指针指向当前周所在扇区
     $('ring-needle').style.transform = 'rotate(' + deg + 'deg)';
-    $('ring-week').textContent = S.week;
+    $('ring-week').textContent = Math.max(1, TOTAL_WEEKS - S.week + 1);
     const attr = wheelAttr();
     const a = ATTRS[attr];
     const isBoost = attr === S.idolColor;
     const note = $('ring-note');
-    note.textContent = a.icon + ' ' + a.label + ' ×' + colorMult();
+    note.textContent = '第' + S.week + '周 · ' + a.icon + ' ' + a.label + ' ×' + colorMult();
     note.dataset.attr = attr;
     note.dataset.boost = isBoost ? '1' : '0';
   }
@@ -543,6 +566,33 @@
     if(card.tuneCost !== undefined) p.push('🎵 需好调 ≥ ' + card.tuneCost);
     if(card.focusCost !== undefined) p.push('🎯 需集中 ≥ ' + card.focusCost);
     return p;
+  }
+
+  function cardChips(card){
+    const p = [];
+    if(card.damage) p.push('⚔️' + card.damage);
+    if(card.focus) p.push('🎯+' + card.focus);
+    if(card.tune) p.push('🎵+' + card.tune);
+    if(card.focusCost !== undefined) p.push('🎯需' + card.focusCost);
+    if(card.tuneCost !== undefined) p.push('🎵需' + card.tuneCost);
+    if(card.greatTune) p.push('🌟绝好调');
+    if(card.vigor) p.push('🔥+' + card.vigor);
+    if(card.heal) p.push('🍵+' + card.heal);
+    if(card.refresh) p.push('⟳再动');
+    if(card.draw) p.push('🂠+' + card.draw);
+    if(card.doubleNext) p.push('👑×2');
+    if(card.aCardBonus) p.push('🎬+' + card.aCardBonus);
+    if(card.turnEndFocus) p.push('🧸回合');
+    if(card.pickTop) p.push('🃏选' + card.pickTop);
+    if(card.nextTurnAction) p.push('➡️+' + card.nextTurnAction);
+    if(card.delayedDraw) p.push('🂠延迟');
+    if(card.redrawHand) p.push('🔄换手');
+    if(card.drawNow) p.push('🂠+' + card.drawNow);
+    if(card.costStamina) p.unshift('❤️-' + card.costStamina);
+    if(card.costHalfTurns) p.push('❤️减半');
+    if(card.multi) p.push('♾️多次');
+    if(!p.length) p.push('🎴辅助');
+    return p.slice(0, 3).map(t => '<span class="card-chip">' + t + '</span>').join('');
   }
 
   function reuseText(card){
@@ -618,6 +668,7 @@
     wrap.classList.remove('is-busy');
     const n = S.candidates.length;
     wrap.classList.toggle('many', n > 3);
+    wrap.classList.toggle('few', n > 0 && n < 3);
     S.candidates.forEach((card, i) => {
       const el = document.createElement('div');
       el.className = 'card type-' + (card.type==='A' ? 'a' : 'm') + (card.exclusive ? ' exclusive' : '');
@@ -627,10 +678,15 @@
       el.setAttribute('aria-label', cardAria(card));
       const costTxt = costText(card);
       el.innerHTML =
-        '<div class="topstrip"></div>' +
-        '<div class="ccost">' + costTxt + '</div>' +
-        '<div class="cname"><span class="tag">' + card.type + '</span>' + (card.exclusive ? '<span class="tag ex">专属</span>' : '') + card.icon + ' ' + card.name + '</div>' +
-        '<div class="cdesc">' + cardDesc(card) + '</div>';
+        '<div class="card-art">' +
+          '<span class="card-type-hex"><span>' + card.type + '</span></span>' +
+          '<span class="card-cost-badge">' + costTxt + '</span>' +
+          '<span class="card-icon">' + card.icon + '</span>' +
+        '</div>' +
+        '<div class="card-foot">' +
+          '<div class="card-name">' + (card.exclusive ? '<span class="ex">★</span> ' : '') + card.name + '</div>' +
+          '<div class="card-chips">' + cardChips(card) + '</div>' +
+        '</div>';
       el.addEventListener('click', () => playCard(card, el));
       el.addEventListener('keydown', (e) => {
         if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); playCard(card, el); }
@@ -1412,6 +1468,8 @@
     const a = ATTRS[idol.color] || ATTRS.sing;
     const rarity = idolRarity(idol);
     const unlocked = isIdolUnlocked(idol);
+    const tagList = idolEffectTags(idol);
+    if(!unlocked) tagList.push('🔒 需通过奖学金抽卡解锁');
 
     const screen = $('screen-select');
     if(screen){
@@ -1442,28 +1500,10 @@
     if(planType) planType.textContent = idol.type;
     const planColor = $('select-plan-color');
     if(planColor) planColor.textContent = a.icon + ' ' + a.label;
-    const chip = $('select-plan-chip');
-    if(chip) chip.textContent = rarity;
-    const mini = $('select-plan-mini');
-    if(mini){
-      mini.innerHTML = idol.img
-        ? '<img src="' + idol.img + '" alt="" style="' + artStyle(idol) + '">'
-        : '<span class="media-emoji">' + idol.icon + '</span>';
-    }
-    const planName = $('select-plan-name');
-    if(planName) planName.textContent = idol.name + ' · ' + idol.type;
     const skill = $('select-plan-skill');
     if(skill) skill.textContent = idolPerkText(idol);
     const tags = $('select-plan-tags');
-    if(tags){
-      const tagList = idolEffectTags(idol);
-      if(!unlocked) tagList.push('🔒 需通过奖学金抽卡解锁');
-      tags.innerHTML = tagList.map(t => '<span class="plan-tag">' + t + '</span>').join('');
-    }
-    const motto = $('select-motto');
-    if(motto) motto.textContent = idol.motto ? '「' + idol.motto + '」' : '';
-    const desc = $('select-desc');
-    if(desc) desc.textContent = idol.desc || '';
+    if(tags) tags.innerHTML = tagList.map(t => '<span class="plan-tag">' + t + '</span>').join('');
 
     const count = $('select-count');
     if(count) count.textContent = (selectIndex + 1) + ' / ' + IDOLS.length;
@@ -1473,6 +1513,22 @@
       startBtn.disabled = !unlocked;
       startBtn.textContent = unlocked ? '开始养成' : '🔒 尚未解锁';
     }
+
+    // 详情弹窗
+    const dlgRar = $('idol-dialog-rarity');
+    if(dlgRar){ dlgRar.textContent = rarity; dlgRar.dataset.rarity = rarity; }
+    const dlgName = $('idol-dialog-name');
+    if(dlgName) dlgName.textContent = idol.name;
+    const dlgSub = $('idol-dialog-sub');
+    if(dlgSub) dlgSub.textContent = (idol.romaji || idol.name) + ' · ' + idol.type + ' · 得意色 ' + a.icon + a.label;
+    const dlgSkill = $('idol-dialog-skill');
+    if(dlgSkill) dlgSkill.textContent = idolPerkText(idol);
+    const dlgTags = $('idol-dialog-tags');
+    if(dlgTags) dlgTags.innerHTML = tagList.map(t => '<span class="plan-tag">' + t + '</span>').join('');
+    const dlgMotto = $('idol-dialog-motto');
+    if(dlgMotto) dlgMotto.textContent = idol.motto ? '「' + idol.motto + '」' : '';
+    const dlgDesc = $('idol-dialog-desc');
+    if(dlgDesc) dlgDesc.textContent = idol.desc || '';
   }
 
   function renderIdolRoster(){
@@ -1506,22 +1562,46 @@
           '<span class="rc-stats">' + main.attr.icon + main.value + '</span>' +
         '</span>' +
         (unlocked ? '' : '<span class="rc-lock">🔒</span>');
-      btn.addEventListener('click', () => {
-        selectIndex = i;
-        selectTouched = true;
-        renderIdolSelect(false);
-      });
+      btn.addEventListener('click', () => selectIdol(i, false));
       grid.appendChild(btn);
     });
-    const active = grid.querySelector('.roster-card.active');
-    if(active && active.scrollIntoView) active.scrollIntoView({ block:'nearest', inline:'center', behavior:'smooth' });
+  }
+
+  function updateRosterActive(){
+    const grid = $('idol-grid');
+    if(!grid) return;
+    Array.prototype.forEach.call(grid.children, (card, i) => {
+      const active = i === selectIndex;
+      card.classList.toggle('active', active);
+      card.setAttribute('aria-selected', String(active));
+    });
+  }
+
+  function centerActiveRoster(smooth){
+    const grid = $('idol-grid');
+    if(!grid) return;
+    const card = grid.children[selectIndex];
+    if(!card) return;
+    const target = card.offsetLeft + card.offsetWidth / 2 - grid.clientWidth / 2;
+    const max = Math.max(0, grid.scrollWidth - grid.clientWidth);
+    const left = Math.max(0, Math.min(target, max));
+    if(Math.abs(grid.scrollLeft - left) < 2) return;
+    grid.scrollTo({ left, behavior: smooth ? 'smooth' : 'auto' });
+  }
+
+  function selectIdol(i, scrollIntoView){
+    if(i === selectIndex) return;
+    selectIndex = Math.max(0, Math.min(i, IDOLS.length - 1));
+    selectTouched = true;
+    updateRosterActive();
+    renderSelectPreview();
+    if(scrollIntoView) centerActiveRoster(true);
   }
 
   function pickRandomIdol(){
     const pool = IDOLS.map((idol, i) => ({ idol, i })).filter(x => isIdolUnlocked(x.idol) && x.i !== selectIndex);
     if(!pool.length) return;
-    selectIndex = pool[Math.floor(Math.random() * pool.length)].i;
-    renderIdolSelect(false);
+    selectIdol(pool[Math.floor(Math.random() * pool.length)].i, true);
   }
 
   function renderIdolAvatar(){
@@ -1545,6 +1625,21 @@
       panel.dataset.color = idol.color;
       panel.style.setProperty('--accent', a.color);
       panel.style.setProperty('--accent-soft', a.color + '2e');
+    }
+    const game = $('screen-game');
+    if(game){
+      game.style.setProperty('--accent', a.color);
+      game.style.setProperty('--accent-soft', a.color + '2e');
+    }
+    const gameBg = $('game-bg');
+    if(gameBg){
+      gameBg.style.backgroundImage = idol.img ? 'url("' + encodeURI(idol.img) + '")' : 'none';
+    }
+    const midIdol = $('mid-idol');
+    if(midIdol){
+      midIdol.innerHTML = idol.img
+        ? '<img src="' + idol.img + '" alt="" style="object-fit:contain;">'
+        : '';
     }
     $('stage-name').textContent = idol.name;
     $('stage-meta').innerHTML = '<b class="stage-rarity">' + rarity + '</b> ' + idol.type + ' · 得意色 ' + a.icon + a.label;
@@ -1620,7 +1715,11 @@
 
   /* ================= 绑定 ================= */
   const dataReady = Promise.all([loadIdolConfigs(), loadCardConfig()]);
-  const openSelect = () => dataReady.finally(() => { renderIdolSelect(true); showScreen('screen-select'); });
+  const openSelect = () => dataReady.finally(() => {
+    renderIdolSelect(true);
+    showScreen('screen-select');
+    requestAnimationFrame(() => centerActiveRoster(false));
+  });
   $('btn-start').addEventListener('click', openSelect);
   $('btn-back-start').addEventListener('click', () => showScreen('screen-start'));
   $('btn-again').addEventListener('click', () => { $('confetti').innerHTML=''; openSelect(); });
@@ -1643,6 +1742,9 @@
   });
   $('select-random').addEventListener('click', pickRandomIdol);
   $('select-help').addEventListener('click', () => $('rules-dialog').showModal());
+  $('select-detail').addEventListener('click', () => $('idol-dialog').showModal());
+  $('idol-dialog-close').addEventListener('click', () => $('idol-dialog').close());
+  $('idol-dialog').addEventListener('click', (e) => { if(e.target === e.currentTarget) e.currentTarget.close(); });
 
   // 底部导航
   document.querySelectorAll('.nav-item[data-nav]').forEach(item => {
