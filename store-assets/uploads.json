@@ -1,0 +1,98 @@
+{
+  "icon": {
+    "assetId": "839054",
+    "height": 1024,
+    "info": {
+      "format": "png",
+      "height": 1024,
+      "size": 179467,
+      "width": 1024
+    },
+    "url": "https://img-tc.tapimg.com/market/images/d324a016cc940df1176e32a3438b667b.png",
+    "width": 1024
+  },
+  "screenshot-1": {
+    "assetId": "839055",
+    "height": 1688,
+    "info": {
+      "format": "png",
+      "height": 1688,
+      "size": 1125267,
+      "width": 780
+    },
+    "url": "https://img-tc.tapimg.com/market/images/42a78ad117aefeaa49ec2d7d97dbe54c.png",
+    "width": 780
+  },
+  "screenshot-2": {
+    "assetId": "839056",
+    "height": 1688,
+    "info": {
+      "format": "png",
+      "height": 1688,
+      "size": 795885,
+      "width": 780
+    },
+    "url": "https://img-tc.tapimg.com/market/images/8eea0705617b085cc7eb4337c5da2e3b.png",
+    "width": 780
+  },
+  "screenshot-3": {
+    "assetId": "839057",
+    "height": 1688,
+    "info": {
+      "format": "png",
+      "height": 1688,
+      "size": 345151,
+      "width": 780
+    },
+    "url": "https://img-tc.tapimg.com/market/images/0fe444d94c41ae680e2c40d36cdf6eb8.png",
+    "width": 780
+  },
+  "screenshot-4": {
+    "assetId": "839058",
+    "height": 1688,
+    "info": {
+      "format": "png",
+      "height": 1688,
+      "size": 372171,
+      "width": 780
+    },
+    "url": "https://img-tc.tapimg.com/market/images/9891e6d6e20fc98bebac8e4586a12157.png",
+    "width": 780
+  },
+  "cover_vertical": {
+    "assetId": "839059",
+    "height": 1800,
+    "info": {
+      "format": "png",
+      "height": 1800,
+      "size": 1120149,
+      "width": 1200
+    },
+    "url": "https://img-tc.tapimg.com/market/images/7d829fce981dffb729ffdb5acd30a4e3.png",
+    "width": 1200
+  },
+  "banner_4": {
+    "assetId": "839060",
+    "height": 1080,
+    "info": {
+      "format": "png",
+      "height": 1080,
+      "size": 907487,
+      "width": 1920
+    },
+    "url": "https://img-tc.tapimg.com/market/images/3dc72d9110c94aa86b54c948de73e516.png",
+    "width": 1920
+  },
+  "square_promo": {
+    "assetId": "839061",
+    "height": 1440,
+    "info": {
+      "format": "png",
+      "height": 1440,
+      "size": 959004,
+      "width": 1440
+    },
+    "url": "https://img-tc.tapimg.com/market/images/6d0c9c810b8e95e2e22a3248cd0dd34d.png",
+    "width": 1440
+  }
+}

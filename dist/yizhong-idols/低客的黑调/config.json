@@ -1,0 +1,17 @@
+{
+  "name": "低客的黑调",
+  "romaji": "Dikedeheidiao",
+  "type": "感性",
+  "rarity": "SR",
+  "specialty": "舞",
+  "color": "dance",
+  "skill": "开局 集中 +7 · 好调 +8 · 元气 +13",
+  "motto": "人类，你听说过黑调的低客吗？",
+  "effects": {
+    "startFocus": 7,
+    "startTune": 8,
+    "startVigor": 13
+  },
+  "description": "人类，你听说过黑调的低客吗？",
+  "image": "1763518909556.png"
+}

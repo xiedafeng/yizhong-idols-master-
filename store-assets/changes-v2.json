@@ -1,0 +1,35 @@
+{
+  "changes": [
+    {
+      "field_id": "banner_4",
+      "value": {
+        "url": "https://img-tc.tapimg.com/market/images/32603b4fe24f577b7c016f9e86f2363e.png",
+        "info": {
+          "format": "png",
+          "height": 1080,
+          "size": 900002,
+          "width": 1920
+        }
+      },
+      "expected": "https://img-tc.tapimg.com/market/images/3dc72d9110c94aa86b54c948de73e516.png"
+    },
+    {
+      "field_id": "square_promo_image",
+      "value": {
+        "url": "https://img-tc.tapimg.com/market/images/7c6c3cdbcdd18dc36dbe363ec91b45d5.png",
+        "info": {
+          "format": "png",
+          "height": 1440,
+          "size": 952444,
+          "width": 1440
+        }
+      },
+      "expected": "https://img-tc.tapimg.com/market/images/6d0c9c810b8e95e2e22a3248cd0dd34d.png"
+    },
+    {
+      "field_id": "promotion_material_type",
+      "value": "GAMEPLAY_DEMO",
+      "expected": []
+    }
+  ]
+}

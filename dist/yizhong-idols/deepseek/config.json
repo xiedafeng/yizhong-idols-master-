@@ -1,0 +1,15 @@
+{
+  "name": "deepseek",
+  "romaji": "DeepSeek",
+  "type": "感性",
+  "rarity": "SR",
+  "specialty": "舞",
+  "color": "dance",
+  "skill": "每使用一张 A 卡 · 好调 +2",
+  "motto": "DeepSeek V4.1 Flash 现已更新至 V4.1-Flash-1017 版本，项目开发能力提升显著，更低成本、更快速度完成任务；新增 API 支持网页搜索与抓取，欢迎测试和反馈",
+  "effects": {
+    "aCardTune": 2
+  },
+  "description": "DeepSeek V4.1 Flash 现已更新至 V4.1-Flash-1017 版本，项目开发能力提升显著，更低成本、更快速度完成任务；新增 API 支持网页搜索与抓取，欢迎测试和反馈",
+  "image": "1789464172546.jpeg"
+}

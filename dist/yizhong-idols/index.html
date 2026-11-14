@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>一中偶像大师 · 学园养成篇（感性）</title>
+<link rel="stylesheet" href="style.css">
+<link rel="preload" as="image" href="background/1781538248015-cutout.webp">
+<link rel="preload" as="image" href="background/1781538664565-cutout.webp">
+<link rel="preload" as="image" href="background/1781538976455-cutout.webp">
+<link rel="preload" as="image" href="background/1781539174191-cutout.webp">
+<link rel="preload" as="font" type="font/woff2" href="fonts/hero-brush.woff2" crossorigin>
+</head>
+<body>
+  <div class="petals" id="petals"></div>
+  <div class="screen-bg" id="screen-bg"></div>
+
+  <div class="app">
+    <!-- 开场 -->
+    <section class="screen active" id="screen-start">
+      <div class="start-idols" aria-hidden="true">
+        <img src="background/1781538248015-cutout.webp" width="1233" height="1600" alt="">
+        <img src="background/1781538664565-cutout.webp" width="1374" height="1600" alt="">
+        <img src="background/1781538976455-cutout.webp" width="1403" height="1600" alt="">
+        <img src="background/1781539174191-cutout.webp" width="1354" height="1600" alt="">
+      </div>
+
+      <div class="start-inner">
+        <div class="hero"><span>一</span><span>中</span><span>偶</span><span>像</span><span>大</span><span>师</span></div>
+        <div class="hero-sub">学园养成篇 · School Idol Producer</div>
+
+        <div class="start-actions">
+          <button class="btn rules-toggle" id="rules-toggle" type="button" aria-haspopup="dialog">📖 玩法说明</button>
+          <button class="btn" id="btn-start">选择偶像 ✨</button>
+        </div>
+
+        <div class="scholarship-bank" id="scholarship-bank">🪙 一中奖学金 <b id="scholarship-total">0</b></div>
+      </div>
+    </section>
+
+    <!-- 选角 -->
+    <section class="screen" id="screen-select">
+      <div class="start-inner">
+        <div class="hero">选择你的偶像</div>
+        <div class="hero-sub">Pick Your Idol · 得意色决定伤害加成时机，起始状态决定开局节奏</div>
+        <div class="idol-carousel">
+          <button class="page-btn" id="idol-prev" title="上一页">‹<span>上一页</span></button>
+          <div class="idol-grid" id="idol-grid"></div>
+          <button class="page-btn" id="idol-next" title="下一页">›<span>下一页</span></button>
+        </div>
+        <button class="btn ghost" id="btn-back-start">← 返回首页</button>
+      </div>
+    </section>
+
+    <!-- 主游戏 -->
+    <section class="screen" id="screen-game">
+      <!-- 左上：颜色轮盘 -->
+      <div class="ring-box">
+        <div class="ring" id="ring">
+          <div class="ring-center"><span class="n" id="ring-week">1</span><span class="t">/12 周</span></div>
+          <div class="ring-needle" id="ring-needle"></div>
+        </div>
+        <div class="ring-note" id="ring-note">🎤 唱 ×1.5</div>
+      </div>
+
+      <!-- 左上：轮盘旁 · 加成与提示 -->
+      <div class="hud-note">
+        <div class="mult-note" id="mult-note">当前加成：🎯 伤害 +0 ｜ 🎵 无</div>
+        <div class="rival-hint" id="rival-hint">对手正在努力训练中…</div>
+      </div>
+
+      <!-- 顶部中央：比分 -->
+      <div class="score-box">
+        <div class="score-line">
+          <span class="who you"><span class="who-avatar" id="you-avatar"></span><span class="who-name" id="you-name">你</span></span>
+          <div class="score-track"><div class="fill you" id="you-fill"></div></div>
+          <span class="score-num" id="you-score">0 分</span>
+        </div>
+        <div class="score-line">
+          <span class="who foe">对手</span>
+          <div class="score-track"><div class="fill foe" id="foe-fill"></div></div>
+          <span class="score-num" id="foe-score">0 分</span>
+        </div>
+      </div>
+
+      <!-- 左侧中央：buff -->
+      <div class="side-buffs">
+        <div class="buff-chip focus"><span class="ic">🎯</span><b>集中</b><span class="vl" id="buff-focus">0</span></div>
+        <div class="buff-chip tune"><span class="ic">🎵</span><b>好调</b><span class="vl" id="buff-tune">0</span></div>
+        <div class="buff-chip great"><span class="ic">🌟</span><b>绝好调</b><span class="vl" id="buff-great">—</span></div>
+      </div>
+
+      <!-- 右上：体力 / 元气 -->
+      <div class="bars">
+        <div class="bar-row">
+          <div class="bar-label">❤️ 体力</div>
+          <div class="bar"><div class="bar-fill stamina" id="stamina-fill"></div></div>
+          <div class="bar-val" id="stamina-val">100</div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">🔥 元气</div>
+          <div class="bar"><div class="bar-fill vigor" id="vigor-fill"></div></div>
+          <div class="bar-val" id="vigor-val">0</div>
+        </div>
+      </div>
+
+      <!-- 中部：日志 -->
+      <div class="mid-area">
+        <div class="log" id="log"></div>
+      </div>
+
+      <!-- 底部：卡牌 -->
+      <div class="hand-bottom">
+        <div class="hand-title">🎴 本回合抽卡 · 请 <span>三选一</span> 打出</div>
+        <div class="hand-cards-wrap">
+          <div class="cards" id="cards"></div>
+          <button class="deck-btn" id="deck-btn" title="查看牌库">📚</button>
+          <button class="rest-btn" id="rest-btn" title="休息一回合 · 体力 +8">
+            <span class="ic">❤️</span><span class="lb">休息</span>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 结算 -->
+    <section class="screen" id="screen-result">
+      <div class="result-inner">
+        <div class="grade" id="grade">S</div>
+        <div class="result-verdict" id="verdict">胜利！</div>
+        <div class="result-sub" id="result-sub">你成功带领偶像击败了宿敌</div>
+        <div class="breakdown" id="breakdown"></div>
+        <button class="btn" id="btn-again">再来一局 🔄</button>
+        <button class="btn ghost" id="btn-home" style="margin-left:10px;">返回首页</button>
+      </div>
+    </section>
+  </div>
+
+  <div class="confetti" id="confetti"></div>
+  <div class="card-tip" id="card-tip"></div>
+
+  <!-- 背景音乐控制 -->
+  <div class="bgm-dock" id="bgm-dock">
+    <button class="bgm-toggle" id="bgm-toggle" type="button" aria-label="关闭背景音乐" aria-pressed="true" title="播放 / 暂停背景音乐">
+      <span id="bgm-icon">🔊</span>
+    </button>
+    <div class="bgm-meta">
+      <span class="bgm-label">BGM</span>
+      <span class="bgm-name" id="bgm-name">关注塔菲谢谢喵</span>
+    </div>
+    <button class="bgm-next" id="bgm-next" type="button" aria-label="切换下一首" title="切换下一首">⏭</button>
+  </div>
+
+  <!-- 牌库查看 -->
+  <div class="deck-overlay" id="deck-overlay">
+    <div class="deck-panel">
+      <div class="deck-head">
+        <span class="deck-title">持有技能卡</span>
+        <button class="deck-close" id="deck-close">✕</button>
+      </div>
+      <div class="deck-body">
+        <div class="deck-sec">
+          <div class="deck-sec-title">🎴 手牌</div>
+          <div class="deck-grid" id="deck-hand"></div>
+        </div>
+        <div class="deck-sec">
+          <div class="deck-sec-title">🂠 牌库</div>
+          <div class="deck-grid" id="deck-pile"></div>
+        </div>
+        <div class="deck-sec">
+          <div class="deck-sec-title">🗑️ 弃牌堆</div>
+          <div class="deck-grid" id="deck-discard"></div>
+        </div>
+        <div class="deck-sec">
+          <div class="deck-sec-title">🚫 除外</div>
+          <div class="deck-grid" id="deck-exiled"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <dialog class="rules-dialog" id="rules-dialog">
+    <div class="rules-dialog-head">
+      <span class="rules-dialog-title">📖 玩法说明</span>
+      <button class="rules-dialog-close" id="rules-dialog-close" type="button" aria-label="关闭">✕</button>
+    </div>
+    <div class="rules-dialog-body">
+      <b>① 12 周养成</b>：每回合随机抽 <b>3 张牌</b>（三选一）打出，累计 <b>打分</b> 与对手比拼。<br>
+      <b>② 两种牌</b>：<span class="tag a">A</span> 攻击牌（主要打分）、<span class="tag m">M</span> 支援牌（主要叠 buff）。<br>
+      <b>③ 三个 buff</b>：<b>集中</b>（每点 +1 伤害，加法）、<b>好调</b>（≥1 时伤害 ×1.5，每回合开始 -1）、<b>绝好调</b>（使好调变为 ×(1.5+0.1×好调数)）。<br>
+      <b>④ 出伤公式</b>：<b>(卡牌伤害 + 集中) × 好调倍率 × 颜色倍率</b>。<br>
+      <b>⑤ 颜色轮盘</b>：每回合轮转，轮到偶像得意色（唱）时本回合伤害 <b>×1.5</b>；颜色只在当回合出伤时生效，不累计。<br>
+      <b>⑥ 体力 / 元气</b>：打牌消耗先扣元气、不足扣体力；体力归零进入<b>体调不良</b>，可用「休息」恢复体力解除。<br>
+      <b>⑦ 特殊</b>：<b>再动</b>（本回合可再打一张）、<b>抽牌 N</b>（下次抽牌多 N 张）。
+    </div>
+  </dialog>
+
+<script src="cards.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

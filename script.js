@@ -24,7 +24,7 @@
       motto:'教给学生的，不只是知识，还有站上舞台的勇气。',
       skillText:'⏱️ 最后 3 回合开始时 分数 +15（受 buff 影响）',
       effects:{ finalBonus:15 } },
-    { id:'jinbao', name:'叶锦宝', romaji:'Jinbao', icon:'👨‍🏫', img:'叶锦宝/jinbao.png', type:'感性', color:'sing',
+    { id:'jinbao', name:'叶锦宝', romaji:'Jinbao', icon:'👨‍🏫', img:'叶锦宝/jinbao.jpg', type:'感性', color:'sing',
       desc:'来自浔郡中学的一级教师，深受学生喜爱（存疑），教过非常多非常优秀的学生，级长',
       motto:'既然是级长，就要拿第一。',
       effects:{ startFocus:6 } },
@@ -79,6 +79,53 @@
       effects:{ visualFocusDouble:true, visualGreatTune:true } },
   ];
 
+  /* ================= 角色图裁切统一 =================
+     来源图风格差异很大（真人照 / 表情包 / 白底 Q 版 / AI 立绘），
+     不改原图，只用统一的 4:5 卡框 + 每张图的裁切参数来对齐构图。
+       fit      cover = 铺满裁切（真人照、全身图）；contain = 完整放入（白底 Q 版）
+       position object-position，控制脸部在框内的位置
+       scale    在 fit 基础上再放大，裁掉边缘水印/文字
+       origin   transform 缩放原点，默认居中；"50% -10%" 可让顶部留白、向下多裁
+       blend    multiply 可让白底融入粉蓝卡底；透明或照片保持 normal */
+  const IMAGE_TUNING = {
+    xiangyang:      { fit:'cover',   position:'50% 12%', scale:1.5, origin:'50% -10%' }, // 小尺寸表情包，放大从顶部裁掉"爷笑了"
+    jinbao:         { fit:'cover',   position:'50% 22%', scale:1.06 }, // 证件照，脸部上移
+    wanghaiping:    { fit:'cover',   position:'50% 20%', scale:1.02 },
+    huangjinhua:    { fit:'cover',   position:'50% 18%', scale:1.04 }, // 自拍，保留人物居中
+    longnainailong: { fit:'cover',   position:'50% 16%', scale:1.12 }, // 小尺寸梗图
+    zhuzhiwu:       { fit:'cover',   position:'50% 18%', scale:1.02 },
+    xiaomin:        { fit:'contain', position:'50% 50%', scale:1.00, blend:'multiply' }, // 白底 Q 版
+    deepseek:       { fit:'cover',   position:'50% 34%', scale:1.10 }, // Q 版头像，放大去边
+    taffy:          { fit:'cover',   position:'50% 30%', scale:1.05 },
+    dikedeheidiao:  { fit:'cover',   position:'50% 22%', scale:1.03 },
+    xungaodaishu:   { fit:'cover',   position:'50% 40%', scale:1.14 }, // 3D 公仔，放大裁掉右下水印
+    niulai:         { fit:'cover',   position:'50% 32%', scale:1.02 },
+  };
+
+  function imageTuning(idol){
+    return Object.assign({ fit:'cover', position:'50% 28%', scale:1, origin:'50% 50%', blend:'normal' }, IMAGE_TUNING[idol.id] || {});
+  }
+  function artStyle(idol){
+    const t = imageTuning(idol);
+    return 'object-fit:' + t.fit + ';object-position:' + t.position +
+      ';transform-origin:' + t.origin +
+      ';transform:scale(' + t.scale + ');mix-blend-mode:' + t.blend + ';';
+  }
+  function idolRarity(idol){
+    return RARITIES[idol.rarity] ? idol.rarity : DEFAULT_RARITY;
+  }
+  function idolPerkText(idol){
+    const eff = idol.effects || {};
+    return idol.skillText || (eff.startFocus ? '🎯 起手集中 +' + eff.startFocus
+      : eff.startTune ? '🎵 起手好调 +' + eff.startTune
+      : eff.startVigor ? '🔥 起手元气 +' + eff.startVigor
+      : '—');
+  }
+  function idolArtHTML(idol, extraClass){
+    if(!idol.img) return '<span class="stage-emoji">' + idol.icon + '</span>';
+    return '<img class="' + (extraClass || '') + '" src="' + idol.img + '" alt="' + idol.name + '" style="' + artStyle(idol) + '">';
+  }
+
   /* ================= 角色解锁 =================
      SSR 角色默认锁定，解锁状态持久化在 localStorage；
      后续抽卡功能调用 window.YizhongIdols.unlock(id) 即可解锁。 */
@@ -107,6 +154,7 @@
   function showLockToast(idol){
     const t = document.createElement('div');
     t.className = 'lock-toast';
+    t.setAttribute('role', 'status');
     t.textContent = '🔒 ' + idol.name + ' 为 SSR 角色，需通过「一中奖学金」抽卡解锁';
     document.body.appendChild(t);
     setTimeout(() => t.remove(), 2200);
@@ -328,6 +376,65 @@
   /* ================= 渲染 ================= */
   const $ = id => document.getElementById(id);
 
+  // 分数飘字 / 周次横幅：用状态差分避免重复触发
+  const fxState = { you: 0, foe: 0, week: 0, ready: false };
+  function prefersReducedMotion(){
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  function showScorePop(side, delta){
+    if(prefersReducedMotion() || document.body.dataset.screen !== 'screen-game') return;
+    const layer = $('fx-layer');
+    const target = $(side === 'you' ? 'you-score' : 'foe-score');
+    if(!layer || !target) return;
+    const r = target.getBoundingClientRect();
+    const el = document.createElement('div');
+    el.className = 'score-pop ' + side;
+    el.textContent = '+' + delta;
+    el.style.left = (r.left + r.width / 2) + 'px';
+    el.style.top = (r.top - 6) + 'px';
+    layer.appendChild(el);
+    setTimeout(() => el.remove(), 950);
+  }
+  function showWeekBanner(week){
+    if(prefersReducedMotion()) return;
+    const layer = $('fx-layer');
+    if(!layer) return;
+    const el = document.createElement('div');
+    el.className = 'week-banner';
+    el.innerHTML = '<b>第 ' + week + ' 周</b><span>LIVE STAGE</span>';
+    layer.appendChild(el);
+    setTimeout(() => el.remove(), 1450);
+  }
+  function syncScoreFx(){
+    if(!fxState.ready){
+      fxState.you = S.totalScore;
+      fxState.foe = S.rival;
+      fxState.week = S.week;
+      fxState.ready = true;
+      return;
+    }
+    if(document.body.dataset.screen === 'screen-game'){
+      if(S.totalScore > fxState.you) showScorePop('you', S.totalScore - fxState.you);
+      if(S.rival > fxState.foe) showScorePop('foe', S.rival - fxState.foe);
+      if(S.week !== fxState.week) showWeekBanner(S.week);
+    }
+    fxState.you = S.totalScore;
+    fxState.foe = S.rival;
+    fxState.week = S.week;
+  }
+
+  function renderHandTitle(){
+    const el = $('hand-title');
+    if(!el || !S) return;
+    const n = S.candidates.length;
+    if(!n){
+      el.textContent = '🎴 本回合手牌';
+      return;
+    }
+    const extra = S.actionsLeft > 1 ? ' · 本回合可出 ' + S.actionsLeft + ' 次' : ' · 打出 1 张';
+    el.innerHTML = '🎴 抽到 <span>' + n + '</span> 张' + extra;
+  }
+
   function renderAll(){
     $('stamina-val').textContent = S.stamina;
     $('vigor-val').textContent = S.vigor;
@@ -355,6 +462,8 @@
     const mx = Math.max(300, S.totalScore, S.rival);
     $('you-fill').style.width = (S.totalScore/mx*100) + '%';
     $('foe-fill').style.width = (S.rival/mx*100) + '%';
+    syncScoreFx();
+    renderHandTitle();
 
     renderRing();
 
@@ -375,7 +484,8 @@
     const isBoost = attr === S.idolColor;
     const note = $('ring-note');
     note.textContent = a.icon + ' ' + a.label + ' ×' + colorMult();
-    note.style.background = isBoost ? a.dark : (S.idol.rarity === 'SSR' ? '#8a6a2f' : '#9aa0a8');
+    note.dataset.attr = attr;
+    note.dataset.boost = isBoost ? '1' : '0';
   }
 
   function costText(card){
@@ -482,24 +592,39 @@
     sec('deck-exiled', S.exiled);
   }
 
+  let deckReturnFocus = null;
   function openDeck(){
+    deckReturnFocus = document.activeElement;
     renderDeck();
     $('deck-overlay').classList.add('show');
+    const closeBtn = $('deck-close');
+    if(closeBtn) closeBtn.focus();
   }
 
   function closeDeck(){
     $('deck-overlay').classList.remove('show');
+    if(deckReturnFocus && typeof deckReturnFocus.focus === 'function') deckReturnFocus.focus();
+    deckReturnFocus = null;
+  }
+
+  function cardAria(card){
+    return card.name + '，' + (card.type === 'A' ? '攻击牌' : '支援牌') +
+      '，消耗 ' + costText(card) + '，' + cardDesc(card);
   }
 
   function renderCards(){
     const wrap = $('cards');
     wrap.innerHTML = '';
+    wrap.classList.remove('is-busy');
     const n = S.candidates.length;
-    wrap.style.gridTemplateColumns = (n > 3 && window.innerWidth > 560) ? ('repeat(' + n + ', 1fr)') : '';
+    wrap.classList.toggle('many', n > 3);
     S.candidates.forEach((card, i) => {
       const el = document.createElement('div');
       el.className = 'card type-' + (card.type==='A' ? 'a' : 'm') + (card.exclusive ? ' exclusive' : '');
       el.style.animationDelay = (i*0.08) + 's';
+      el.setAttribute('role', 'button');
+      el.tabIndex = 0;
+      el.setAttribute('aria-label', cardAria(card));
       const costTxt = costText(card);
       el.innerHTML =
         '<div class="topstrip"></div>' +
@@ -507,10 +632,16 @@
         '<div class="cname"><span class="tag">' + card.type + '</span>' + (card.exclusive ? '<span class="tag ex">专属</span>' : '') + card.icon + ' ' + card.name + '</div>' +
         '<div class="cdesc">' + cardDesc(card) + '</div>';
       el.addEventListener('click', () => playCard(card, el));
+      el.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); playCard(card, el); }
+      });
       el.addEventListener('mouseenter', () => showTip(card, el));
       el.addEventListener('mouseleave', hideTip);
+      el.addEventListener('focus', () => showTip(card, el));
+      el.addEventListener('blur', hideTip);
       wrap.appendChild(el);
     });
+    renderHandTitle();
   }
 
   function addLog(msg){
@@ -519,6 +650,10 @@
     const log = $('log');
     log.innerHTML = '';
     S.log.forEach(m => { const d = document.createElement('div'); d.innerHTML = m; log.appendChild(d); });
+    const status = $('sr-status');
+    if(status && S.log.length){
+      status.textContent = S.log[0].replace(/<[^>]*>/g, '');
+    }
   }
 
   function showSkillPop(icon, name){
@@ -632,7 +767,7 @@
   }
 
   function playCard(card, el){
-    if(S.over) return;
+    if(S.over || (el && el.classList.contains('played'))) return;
     if(card.tuneCost !== undefined && S.tune < card.tuneCost){
       addLog('🚫 <b>' + card.icon + ' ' + card.name + '</b> — 好调不足（需 ' + card.tuneCost + '，当前 ' + S.tune + '）');
       return;
@@ -643,6 +778,8 @@
     }
     hideTip();
     el.classList.add('played');
+    el.tabIndex = -1;
+    el.setAttribute('aria-disabled', 'true');
     if(card.exclusive) showExclusiveFx(card);
     else showSkillPop(card.icon, card.name);
     S.candidates = S.candidates.filter(c => c !== card);
@@ -715,9 +852,14 @@
   function finishPlay(){
     S.actionsLeft -= 1;
     S.over = true;
+    const hand = $('cards');
+    if(hand) hand.classList.add('is-busy');
+    renderHandTitle();
     setTimeout(() => {
       if(S.actionsLeft > 0){
         S.over = false;
+        if(hand) hand.classList.remove('is-busy');
+        renderHandTitle();
       } else {
         endTurn();
       }
@@ -741,6 +883,9 @@
 
     const overlay = document.createElement('div');
     overlay.className = 'deck-overlay show';
+    overlay.setAttribute('role', 'dialog');
+    overlay.setAttribute('aria-modal', 'true');
+    overlay.setAttribute('aria-label', '选择卡牌置于牌堆顶部');
     overlay.innerHTML =
       '<div class="deck-panel">' +
         '<div class="deck-head">' +
@@ -768,14 +913,23 @@
       cards.forEach(card => {
         const tile = document.createElement('div');
         tile.className = 'deck-card pickable type-' + (card.type === 'A' ? 'a' : 'm');
+        tile.setAttribute('role', 'button');
+        tile.setAttribute('aria-pressed', 'false');
+        tile.tabIndex = 0;
         tile.innerHTML = deckCardInner(card);
-        tile.addEventListener('click', () => {
+        const toggle = () => {
           const i = picked.indexOf(card);
           if(i >= 0){ picked.splice(i, 1); }
           else if(picked.length < target){ picked.push(card); }
-          tile.classList.toggle('selected', picked.includes(card));
+          const on = picked.includes(card);
+          tile.classList.toggle('selected', on);
+          tile.setAttribute('aria-pressed', String(on));
           confirmBtn.disabled = picked.length !== target;
           counter.textContent = '已选 ' + picked.length + '/' + target;
+        };
+        tile.addEventListener('click', toggle);
+        tile.addEventListener('keydown', (e) => {
+          if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); toggle(); }
         });
         grid.appendChild(tile);
       });
@@ -785,6 +939,8 @@
 
     makeTiles('🂠 牌堆', S.deck);
     makeTiles('🗑️ 弃牌堆', S.discard);
+    const firstTile = overlay.querySelector('.deck-card.pickable');
+    if(firstTile) firstTile.focus();
 
     confirmBtn.addEventListener('click', () => {
       if(picked.length !== target) return;
@@ -800,6 +956,8 @@
       S.pickTopPending = 0;
       addLog('🃏 ' + picked.map(c => c.icon + ' ' + c.name).join('、') + ' 置于牌堆顶部');
       overlay.remove();
+      const handWrap = $('cards');
+      if(handWrap) handWrap.focus();
       finishPlay();
     });
   }
@@ -808,6 +966,8 @@
     if(S.over) return;
     hideTip();
     S.over = true;
+    const hand = $('cards');
+    if(hand) hand.classList.add('is-busy');
     S.stamina = clamp(S.stamina + 8, 0, MAX_STAMINA);
     addLog('🛌 休息一回合 · ❤️体力 +8');
     renderAll();
@@ -988,6 +1148,7 @@
     $('grade').className = 'grade ' + gclass;
     $('verdict').textContent = verdict;
     $('result-sub').textContent = sub;
+    paintResultIdol();
 
     const b = $('breakdown');
     b.innerHTML =
@@ -1008,7 +1169,7 @@
 
   /* ================= 背景音乐 ================= */
   const BGM_TRACKS = [
-    { name: '关注塔菲谢谢喵', src: 'bgm/【官方编舞&sol;动作配布】关注塔菲谢谢喵☆_哔哩哔哩_bilibili.mp3' },
+    { name: '学园偶像进行曲', src: 'bgm/school-idol.mp3' },
   ];
   const BGM_VOLUME = 0.45;
   const BGM_KEY_MUTED = 'yizhong-idol-bgm-muted';
@@ -1045,11 +1206,21 @@
   }
 
   function updateBgmUI(){
+    const icon = bgmMuted ? '🔇' : '🔊';
+    const label = bgmMuted ? '开启背景音乐' : '关闭背景音乐';
+    $('bgm-icon').textContent = icon;
     const btn = $('bgm-toggle');
-    $('bgm-icon').textContent = bgmMuted ? '🔇' : '🔊';
     btn.classList.toggle('muted', bgmMuted);
     btn.setAttribute('aria-pressed', String(!bgmMuted));
-    btn.setAttribute('aria-label', bgmMuted ? '开启背景音乐' : '关闭背景音乐');
+    btn.setAttribute('aria-label', label);
+    const mini = $('bgm-mini');
+    if(mini){
+      const miniIcon = $('bgm-mini-icon');
+      if(miniIcon) miniIcon.textContent = icon;
+      mini.classList.toggle('muted', bgmMuted);
+      mini.setAttribute('aria-pressed', String(!bgmMuted));
+      mini.setAttribute('aria-label', label);
+    }
   }
 
   function toggleBgm(){
@@ -1108,33 +1279,50 @@
     const slice = IDOLS.slice(idolPage * IDOLS_PER_PAGE, idolPage * IDOLS_PER_PAGE + IDOLS_PER_PAGE);
     const grid = $('idol-grid');
     grid.innerHTML = '';
+    grid.classList.toggle('few', slice.length < IDOLS_PER_PAGE);
+    const pageEl = $('idol-page');
+    if(pageEl) pageEl.textContent = (idolPage + 1) + ' / ' + totalPages;
     slice.forEach(idol => {
       const a = ATTRS[idol.color];
-      const eff = idol.effects || {};
-      const perkTxt = idol.skillText || (eff.startFocus ? '🎯 起手集中 +' + eff.startFocus
-        : eff.startTune ? '🎵 起手好调 +' + eff.startTune
-        : eff.startVigor ? '🔥 起手元气 +' + eff.startVigor
-        : '—');
-      const rarity = RARITIES[idol.rarity] ? idol.rarity : DEFAULT_RARITY;
+      const rarity = idolRarity(idol);
       const unlocked = isIdolUnlocked(idol);
       const el = document.createElement('div');
       el.className = 'idol-pick' + (unlocked ? '' : ' locked');
       el.dataset.rarity = rarity;
+      el.dataset.color = idol.color;
+      el.style.setProperty('--accent', a.color);
+      el.style.setProperty('--accent-soft', a.color + '2e');
+      el.style.setProperty('--accent-dark', a.dark);
+      el.setAttribute('role', 'button');
+      el.tabIndex = 0;
+      el.setAttribute('aria-label', '选择 ' + idol.name + '，' + rarity + '，得意色 ' + a.label);
+      if(!unlocked) el.setAttribute('aria-disabled', 'true');
       el.innerHTML =
         '<span class="rarity-badge">' + rarity + '</span>' +
-        (idol.img
-          ? '<div class="pick-avatar"><img src="' + idol.img + '" alt="' + idol.name + '"></div>'
-          : '<div class="pick-avatar" style="background:' + a.color + '33">' + idol.icon + '</div>') +
-        '<h3>' + idol.name + ' <span class="type-chip">' + idol.type + '</span></h3>' +
-        '<div class="pick-sub">' + idol.romaji + '</div>' +
-        '<span class="pick-color" style="background:' + a.dark + '">得意色 ' + a.icon + a.label + '</span>' +
-        '<p>' + idol.desc + '</p>' +
-        (idol.motto ? '<div class="pick-motto">「' + idol.motto + '」</div>' : '') +
-        '<div class="pick-perk">' + perkTxt + '</div>' +
+        '<div class="pick-media">' +
+          '<span class="media-grid" aria-hidden="true"></span>' +
+          (idol.img
+            ? '<img src="' + idol.img + '" alt="' + idol.name + '" style="' + artStyle(idol) + '">'
+            : '<span class="media-emoji">' + idol.icon + '</span>') +
+          '<span class="media-wash"></span>' +
+          '<span class="media-scrim"></span>' +
+        '</div>' +
+        '<div class="pick-body">' +
+          '<div class="pick-head"><h3>' + idol.name + '</h3><span class="type-chip">' + idol.type + '</span></div>' +
+          '<div class="pick-sub">' + idol.romaji + '</div>' +
+          '<span class="pick-color">' + a.icon + ' 得意色 ' + a.label + '</span>' +
+          '<div class="pick-perk">' + idolPerkText(idol) + '</div>' +
+          '<p>' + idol.desc + '</p>' +
+          (idol.motto ? '<div class="pick-motto">「' + idol.motto + '」</div>' : '') +
+        '</div>' +
         (unlocked ? '' : '<div class="idol-lock"><span>🔒</span><b>未解锁</b><small>需通过一中奖学金抽卡解锁</small></div>');
-      el.addEventListener('click', () => {
+      const activate = () => {
         if(!unlocked){ showLockToast(idol); return; }
         startGame(idol);
+      };
+      el.addEventListener('click', activate);
+      el.addEventListener('keydown', (e) => {
+        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); activate(); }
       });
       grid.appendChild(el);
     });
@@ -1144,14 +1332,56 @@
 
   function renderIdolAvatar(){
     const idol = S.idol;
+    const a = ATTRS[idol.color] || ATTRS.sing;
+    const rarity = idolRarity(idol);
+    const img = idol.img ? '<img src="' + idol.img + '" alt="' + idol.name + '" style="' + artStyle(idol) + '">' : '';
+
     const av = $('you-avatar');
-    av.innerHTML = idol.img ? '<img src="' + idol.img + '" alt="' + idol.name + '">' : idol.icon;
+    av.innerHTML = idol.img ? img : idol.icon;
     $('you-name').textContent = idol.name;
+
+    const stage = $('stage-idol');
+    if(stage){
+      stage.innerHTML = idol.img ? img : '<span class="stage-emoji">' + idol.icon + '</span>';
+      stage.style.setProperty('--accent', a.color);
+      stage.style.setProperty('--accent-soft', a.color + '2e');
+    }
+    const panel = $('stage-panel');
+    if(panel){
+      panel.dataset.color = idol.color;
+      panel.style.setProperty('--accent', a.color);
+      panel.style.setProperty('--accent-soft', a.color + '2e');
+    }
+    $('stage-name').textContent = idol.name;
+    $('stage-meta').innerHTML = '<b class="stage-rarity">' + rarity + '</b> ' + idol.type + ' · 得意色 ' + a.icon + a.label;
+    $('stage-skill').textContent = idolPerkText(idol);
+
+    paintResultIdol();
+  }
+
+  function paintResultIdol(){
+    const el = $('result-idol');
+    if(!el) return;
+    if(!S || !S.idol){ el.innerHTML = ''; return; }
+    const idol = S.idol;
+    const a = ATTRS[idol.color] || ATTRS.sing;
+    el.style.setProperty('--accent', a.color);
+    el.innerHTML = idol.img
+      ? '<img src="' + idol.img + '" alt="' + idol.name + '" style="' + artStyle(idol) + '"><span class="result-idol-name">' + idol.name + '</span>'
+      : '<span class="result-idol-name">' + idol.icon + ' ' + idol.name + '</span>';
   }
 
   function startGame(idol){
     if(!isIdolUnlocked(idol)){ showLockToast(idol); return; }
     newGame(idol);
+    fxState.you = S.totalScore;
+    fxState.foe = S.rival;
+    fxState.week = S.week;
+    fxState.ready = true;
+    const fx = $('fx-layer');
+    if(fx) fx.innerHTML = '';
+    const hand = $('cards');
+    if(hand) hand.classList.remove('is-busy');
     renderIdolAvatar();
     drawCandidates();
     S.over = false;
@@ -1208,6 +1438,9 @@
   $('deck-btn').addEventListener('click', openDeck);
   $('deck-close').addEventListener('click', closeDeck);
   $('deck-overlay').addEventListener('click', (e) => { if(e.target.id === 'deck-overlay') closeDeck(); });
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && $('deck-overlay').classList.contains('show')) closeDeck();
+  });
 
   const rulesDialog = $('rules-dialog');
   $('rules-toggle').addEventListener('click', () => rulesDialog.showModal());
@@ -1216,6 +1449,7 @@
 
   document.body.dataset.screen = 'screen-start';
   $('bgm-toggle').addEventListener('click', toggleBgm);
+  $('bgm-mini').addEventListener('click', toggleBgm);
   $('bgm-next').addEventListener('click', nextBgm);
   document.addEventListener('pointerdown', unlockBgm);
   document.addEventListener('keydown', unlockBgm);
