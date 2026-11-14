@@ -105,16 +105,16 @@ class CDP {
     await cdp.eval(`document.getElementById('btn-start').click()`);
     await sleep(1200);
     for (let i = 0; i < 20; i++) {
-      const n = await cdp.eval(`document.querySelectorAll('#idol-grid .idol-pick').length`);
+      const n = await cdp.eval(`document.querySelectorAll('#idol-grid .roster-card').length`);
       if (n > 0) break;
       await sleep(300);
     }
-    const idolCount = await cdp.eval(`document.querySelectorAll('#idol-grid .idol-pick').length`);
+    const idolCount = await cdp.eval(`document.querySelectorAll('#idol-grid .roster-card').length`);
     console.log('idol cards:', idolCount);
     await sleep(800);
     await cdp.shot('02-select');
 
-    await cdp.eval(`document.querySelector('#idol-grid .idol-pick').click()`);
+    await cdp.eval(`document.getElementById('select-start').click()`);
     await sleep(1500);
     const screen = await cdp.eval(`document.body.dataset.screen`);
     const hand = await cdp.eval(`document.querySelectorAll('#cards .card').length`);

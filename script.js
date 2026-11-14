@@ -1118,6 +1118,7 @@
   function renderScholarship(){
     const el = $('scholarship-total');
     if(el) el.textContent = scholarship;
+    renderHomeMeta();
   }
 
   /* ================= 结算 ================= */
@@ -1221,6 +1222,18 @@
       mini.setAttribute('aria-pressed', String(!bgmMuted));
       mini.setAttribute('aria-label', label);
     }
+    const homeIcon = $('home-bgm-icon');
+    if(homeIcon) homeIcon.textContent = icon;
+    const homeBtn = $('home-bgm-btn');
+    if(homeBtn){
+      homeBtn.classList.toggle('muted', bgmMuted);
+      homeBtn.setAttribute('aria-pressed', String(!bgmMuted));
+      homeBtn.setAttribute('aria-label', label);
+    }
+    const navIcon = $('nav-bgm-icon');
+    if(navIcon) navIcon.textContent = bgmMuted ? '🔇' : '🎵';
+    const selNavIcon = $('sel-nav-bgm-icon');
+    if(selNavIcon) selNavIcon.textContent = bgmMuted ? '🔇' : '🎵';
   }
 
   function toggleBgm(){
@@ -1270,64 +1283,245 @@
     setScreenBg(id);
     window.scrollTo(0,0);
   }
-  let idolPage = 0;
-  const IDOLS_PER_PAGE = 5;
+  /* ================= 主页装饰与数据 ================= */
+  const HOME_ART = [
+    'background/1781538248015-cutout.webp',
+    'background/1781538664565-cutout.webp',
+    'background/1781538976455-cutout.webp',
+    'background/1781539174191-cutout.webp',
+  ];
+  let homeArtIndex = 2;
+
+  function renderHomeArt(step){
+    const img = $('home-idol-img');
+    const box = $('home-idol');
+    if(!img || !box) return;
+    if(step){
+      homeArtIndex = (homeArtIndex + step + HOME_ART.length) % HOME_ART.length;
+      box.classList.remove('swap');
+      void box.offsetWidth;
+      box.classList.add('swap');
+    }
+    img.src = HOME_ART[homeArtIndex];
+    img.alt = '看板偶像立绘 ' + (homeArtIndex + 1);
+  }
+
+  function tickClock(){
+    const el = $('home-clock');
+    if(!el) return;
+    const d = new Date();
+    el.textContent = String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+  }
+
+  function homeLevel(){
+    return Math.max(1, Math.floor(Math.sqrt(Math.max(0, scholarship) / 6)) + 1);
+  }
+
+  function renderHomeMeta(){
+    const plv = $('plv-value');
+    if(plv) plv.textContent = homeLevel();
+    const cnt = $('home-idol-count');
+    if(cnt) cnt.textContent = IDOLS.filter(i => isIdolUnlocked(i)).length + ' / ' + IDOLS.length;
+  }
+
+  function showToast(msg){
+    const t = document.createElement('div');
+    t.className = 'lock-toast';
+    t.setAttribute('role', 'status');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 2200);
+  }
+
+  function toggleFullscreen(){
+    if(document.fullscreenElement){
+      if(document.exitFullscreen) document.exitFullscreen();
+      return;
+    }
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if(!req){ showToast('当前浏览器不支持全屏'); return; }
+    const ret = req.call(el);
+    if(ret && ret.catch) ret.catch(() => showToast('当前浏览器不支持全屏'));
+  }
+
+  /* ================= 偶像相性 / 特性 ================= */
+  const AFFINITY_ORDER = ['sing', 'dance', 'visual'];
+  function idolAffinity(idol){
+    let h = 0;
+    for(let i = 0; i < idol.id.length; i++) h = (h * 31 + idol.id.charCodeAt(i)) % 97;
+    const values = [82 + (h % 10), 82 + ((h * 7) % 10), 82 + ((h * 13) % 10)];
+    const main = AFFINITY_ORDER.indexOf(idol.color);
+    if(main >= 0) values[main] = 120;
+    return AFFINITY_ORDER.map((key, i) => ({ key, attr: ATTRS[key], value: values[i] }));
+  }
+
+  function gradeForAffinity(value){
+    if(value >= 115) return 'S';
+    if(value >= 100) return 'A';
+    if(value >= 88) return 'B';
+    return 'C';
+  }
+
+  function statRingsHTML(idol){
+    return idolAffinity(idol).map(item => {
+      const pct = Math.round(item.value / 150 * 100);
+      return '<div class="stat-ring" style="--c:' + item.attr.color + ';--p:' + pct + '%">' +
+        '<div class="ring-dial">' +
+          '<span class="ring-grade">' + gradeForAffinity(item.value) + '</span>' +
+          '<span class="ring-pct">' + pct + '%</span>' +
+        '</div>' +
+        '<span class="ring-label">' + item.attr.icon + ' ' + item.attr.label + '<small>' + item.value + '</small></span>' +
+      '</div>';
+    }).join('');
+  }
+
+  function idolEffectTags(idol){
+    const e = idol.effects || {};
+    const tags = [];
+    if(e.startFocus) tags.push('🎯 起手集中 +' + e.startFocus);
+    if(e.startTune) tags.push('🎵 起手好调 +' + e.startTune);
+    if(e.startVigor) tags.push('🔥 起手元气 +' + e.startVigor);
+    if(e.finalBonus) tags.push('⏱️ 终盘 +' + e.finalBonus);
+    if(e.lastTurnBonus) tags.push('⏱️ 末回合 +' + e.lastTurnBonus);
+    if(e.singExtraAction || e.danceExtraAction || e.visualExtraAction) tags.push('🔄 得意色回合再动');
+    if(e.visualFocusBonus) tags.push('✨ 得意色集中 +' + e.visualFocusBonus);
+    if(e.visualFocusDouble) tags.push('✨ 得意色集中 ×2');
+    if(e.visualTuneDouble) tags.push('✨ 好调倍率 +0.2');
+    if(e.visualGreatTune) tags.push('🌟 得意色绝好调');
+    if(e.aCardTune) tags.push('🎵 A 卡好调 +' + e.aCardTune);
+    if(!tags.length) tags.push('🎴 技能型偶像');
+    return tags;
+  }
+
+  /* ================= 选角：预览 + 横向选择 ================= */
+  const DEFAULT_SELECT_INDEX = Math.max(0, IDOLS.findIndex(i => i.id === 'jinbao'));
+  let selectIndex = -1;
+  let selectTouched = false;
+
   function renderIdolSelect(reset){
-    if(reset) idolPage = 0;
-    const totalPages = Math.max(1, Math.ceil(IDOLS.length / IDOLS_PER_PAGE));
-    idolPage = Math.max(0, Math.min(idolPage, totalPages - 1));
-    const slice = IDOLS.slice(idolPage * IDOLS_PER_PAGE, idolPage * IDOLS_PER_PAGE + IDOLS_PER_PAGE);
+    if(selectIndex < 0 || (reset && !selectTouched)) selectIndex = DEFAULT_SELECT_INDEX;
+    selectIndex = Math.max(0, Math.min(selectIndex, IDOLS.length - 1));
+    renderSelectPreview();
+    renderIdolRoster();
+  }
+
+  function renderSelectPreview(){
+    const idol = IDOLS[selectIndex];
+    if(!idol) return;
+    const a = ATTRS[idol.color] || ATTRS.sing;
+    const rarity = idolRarity(idol);
+    const unlocked = isIdolUnlocked(idol);
+
+    const screen = $('screen-select');
+    if(screen){
+      screen.style.setProperty('--accent', a.color);
+      screen.style.setProperty('--accent-soft', a.color + '2e');
+    }
+
+    const art = $('select-art');
+    if(art){
+      art.innerHTML = idol.img
+        ? '<img src="' + idol.img + '" alt="' + idol.name + '" style="' + artStyle(idol) + '">'
+        : '<span class="media-emoji">' + idol.icon + '</span>';
+    }
+    const bgtext = $('select-bgtext');
+    if(bgtext) bgtext.textContent = (idol.romaji || idol.name).toUpperCase();
+
+    const nameEl = $('select-name');
+    if(nameEl) nameEl.textContent = idol.name;
+    const subEl = $('select-sub');
+    if(subEl) subEl.textContent = (idol.romaji || idol.name) + ' · ' + idol.type + ' · 得意色 ' + a.icon + a.label;
+    const rar = $('select-rarity');
+    if(rar){ rar.textContent = rarity; rar.dataset.rarity = rarity; }
+
+    const stats = $('select-stats');
+    if(stats) stats.innerHTML = statRingsHTML(idol);
+
+    const planType = $('select-plan-type');
+    if(planType) planType.textContent = idol.type;
+    const planColor = $('select-plan-color');
+    if(planColor) planColor.textContent = a.icon + ' ' + a.label;
+    const chip = $('select-plan-chip');
+    if(chip) chip.textContent = rarity;
+    const mini = $('select-plan-mini');
+    if(mini){
+      mini.innerHTML = idol.img
+        ? '<img src="' + idol.img + '" alt="" style="' + artStyle(idol) + '">'
+        : '<span class="media-emoji">' + idol.icon + '</span>';
+    }
+    const planName = $('select-plan-name');
+    if(planName) planName.textContent = idol.name + ' · ' + idol.type;
+    const skill = $('select-plan-skill');
+    if(skill) skill.textContent = idolPerkText(idol);
+    const tags = $('select-plan-tags');
+    if(tags){
+      const tagList = idolEffectTags(idol);
+      if(!unlocked) tagList.push('🔒 需通过奖学金抽卡解锁');
+      tags.innerHTML = tagList.map(t => '<span class="plan-tag">' + t + '</span>').join('');
+    }
+    const motto = $('select-motto');
+    if(motto) motto.textContent = idol.motto ? '「' + idol.motto + '」' : '';
+    const desc = $('select-desc');
+    if(desc) desc.textContent = idol.desc || '';
+
+    const count = $('select-count');
+    if(count) count.textContent = (selectIndex + 1) + ' / ' + IDOLS.length;
+
+    const startBtn = $('select-start');
+    if(startBtn){
+      startBtn.disabled = !unlocked;
+      startBtn.textContent = unlocked ? '开始养成' : '🔒 尚未解锁';
+    }
+  }
+
+  function renderIdolRoster(){
     const grid = $('idol-grid');
+    if(!grid) return;
     grid.innerHTML = '';
-    grid.classList.toggle('few', slice.length < IDOLS_PER_PAGE);
-    const pageEl = $('idol-page');
-    if(pageEl) pageEl.textContent = (idolPage + 1) + ' / ' + totalPages;
-    slice.forEach(idol => {
-      const a = ATTRS[idol.color];
+    IDOLS.forEach((idol, i) => {
+      const a = ATTRS[idol.color] || ATTRS.sing;
       const rarity = idolRarity(idol);
       const unlocked = isIdolUnlocked(idol);
-      const el = document.createElement('div');
-      el.className = 'idol-pick' + (unlocked ? '' : ' locked');
-      el.dataset.rarity = rarity;
-      el.dataset.color = idol.color;
-      el.style.setProperty('--accent', a.color);
-      el.style.setProperty('--accent-soft', a.color + '2e');
-      el.style.setProperty('--accent-dark', a.dark);
-      el.setAttribute('role', 'button');
-      el.tabIndex = 0;
-      el.setAttribute('aria-label', '选择 ' + idol.name + '，' + rarity + '，得意色 ' + a.label);
-      if(!unlocked) el.setAttribute('aria-disabled', 'true');
-      el.innerHTML =
-        '<span class="rarity-badge">' + rarity + '</span>' +
-        '<div class="pick-media">' +
-          '<span class="media-grid" aria-hidden="true"></span>' +
+      const aff = idolAffinity(idol);
+      const main = aff.find(x => x.key === idol.color) || aff[0];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'roster-card' + (i === selectIndex ? ' active' : '') + (unlocked ? '' : ' locked');
+      btn.dataset.rarity = rarity;
+      btn.style.setProperty('--accent', a.color);
+      btn.style.setProperty('--accent-soft', a.color + '2e');
+      btn.setAttribute('role', 'option');
+      btn.setAttribute('aria-selected', String(i === selectIndex));
+      btn.setAttribute('aria-label', idol.name + '，' + rarity + '，得意色 ' + a.label + (unlocked ? '' : '，未解锁'));
+      btn.innerHTML =
+        '<span class="rc-rarity">' + rarity + '</span>' +
+        '<span class="rc-media">' +
           (idol.img
             ? '<img src="' + idol.img + '" alt="' + idol.name + '" style="' + artStyle(idol) + '">'
             : '<span class="media-emoji">' + idol.icon + '</span>') +
-          '<span class="media-wash"></span>' +
-          '<span class="media-scrim"></span>' +
-        '</div>' +
-        '<div class="pick-body">' +
-          '<div class="pick-head"><h3>' + idol.name + '</h3><span class="type-chip">' + idol.type + '</span></div>' +
-          '<div class="pick-sub">' + idol.romaji + '</div>' +
-          '<span class="pick-color">' + a.icon + ' 得意色 ' + a.label + '</span>' +
-          '<div class="pick-perk">' + idolPerkText(idol) + '</div>' +
-          '<p>' + idol.desc + '</p>' +
-          (idol.motto ? '<div class="pick-motto">「' + idol.motto + '」</div>' : '') +
-        '</div>' +
-        (unlocked ? '' : '<div class="idol-lock"><span>🔒</span><b>未解锁</b><small>需通过一中奖学金抽卡解锁</small></div>');
-      const activate = () => {
-        if(!unlocked){ showLockToast(idol); return; }
-        startGame(idol);
-      };
-      el.addEventListener('click', activate);
-      el.addEventListener('keydown', (e) => {
-        if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); activate(); }
+        '</span>' +
+        '<span class="rc-body">' +
+          '<span class="rc-name">' + idol.name + '</span>' +
+          '<span class="rc-stats">' + main.attr.icon + main.value + '</span>' +
+        '</span>' +
+        (unlocked ? '' : '<span class="rc-lock">🔒</span>');
+      btn.addEventListener('click', () => {
+        selectIndex = i;
+        selectTouched = true;
+        renderIdolSelect(false);
       });
-      grid.appendChild(el);
+      grid.appendChild(btn);
     });
-    $('idol-prev').disabled = idolPage <= 0;
-    $('idol-next').disabled = idolPage >= totalPages - 1;
+    const active = grid.querySelector('.roster-card.active');
+    if(active && active.scrollIntoView) active.scrollIntoView({ block:'nearest', inline:'center', behavior:'smooth' });
+  }
+
+  function pickRandomIdol(){
+    const pool = IDOLS.map((idol, i) => ({ idol, i })).filter(x => isIdolUnlocked(x.idol) && x.i !== selectIndex);
+    if(!pool.length) return;
+    selectIndex = pool[Math.floor(Math.random() * pool.length)].i;
+    renderIdolSelect(false);
   }
 
   function renderIdolAvatar(){
@@ -1426,14 +1620,42 @@
 
   /* ================= 绑定 ================= */
   const dataReady = Promise.all([loadIdolConfigs(), loadCardConfig()]);
-  $('btn-start').addEventListener('click', () => {
-    dataReady.finally(() => { renderIdolSelect(true); showScreen('screen-select'); });
-  });
+  const openSelect = () => dataReady.finally(() => { renderIdolSelect(true); showScreen('screen-select'); });
+  $('btn-start').addEventListener('click', openSelect);
   $('btn-back-start').addEventListener('click', () => showScreen('screen-start'));
-  $('btn-again').addEventListener('click', () => { $('confetti').innerHTML=''; renderIdolSelect(true); showScreen('screen-select'); });
-  $('idol-prev').addEventListener('click', () => { idolPage--; renderIdolSelect(false); });
-  $('idol-next').addEventListener('click', () => { idolPage++; renderIdolSelect(false); });
+  $('btn-again').addEventListener('click', () => { $('confetti').innerHTML=''; openSelect(); });
   $('btn-home').addEventListener('click', () => { $('confetti').innerHTML=''; showScreen('screen-start'); });
+
+  // 主页功能栏
+  $('home-bg-change').addEventListener('click', () => renderHomeArt(1));
+  $('home-bgm-btn').addEventListener('click', toggleBgm);
+  $('home-fullscreen').addEventListener('click', toggleFullscreen);
+  $('home-roster').addEventListener('click', openSelect);
+  $('home-rules').addEventListener('click', () => $('rules-dialog').showModal());
+  $('home-about').addEventListener('click', () => showToast('《一中偶像大师》· 学园养成篇 · AI 生成的校园同人企划，仅供娱乐'));
+
+  // 选角操作
+  $('select-start').addEventListener('click', () => {
+    const idol = IDOLS[selectIndex];
+    if(!idol) return;
+    if(!isIdolUnlocked(idol)){ showLockToast(idol); return; }
+    startGame(idol);
+  });
+  $('select-random').addEventListener('click', pickRandomIdol);
+  $('select-help').addEventListener('click', () => $('rules-dialog').showModal());
+
+  // 底部导航
+  document.querySelectorAll('.nav-item[data-nav]').forEach(item => {
+    item.addEventListener('click', () => {
+      const nav = item.dataset.nav;
+      if(nav === 'home') showScreen('screen-start');
+      else if(nav === 'idols'){
+        if(document.body.dataset.screen !== 'screen-select') openSelect();
+      }
+      else if(nav === 'rules') $('rules-dialog').showModal();
+      else if(nav === 'music') toggleBgm();
+    });
+  });
   $('rest-btn').addEventListener('click', rest);
   $('deck-btn').addEventListener('click', openDeck);
   $('deck-close').addEventListener('click', closeDeck);
@@ -1459,4 +1681,7 @@
   setScreenBg('screen-start');
   makePetals();
   renderScholarship();
+  renderHomeArt(0);
+  tickClock();
+  setInterval(tickClock, 30000);
 })();

@@ -18,47 +18,176 @@
   <div class="screen-bg" id="screen-bg" aria-hidden="true"></div>
 
   <div class="app">
-    <!-- 开场 -->
+    <!-- 主页 -->
     <section class="screen active" id="screen-start">
-      <div class="start-idols" aria-hidden="true">
-        <img src="background/1781538248015-cutout.webp" width="1233" height="1600" alt="">
-        <img src="background/1781538664565-cutout.webp" width="1374" height="1600" alt="">
-        <img src="background/1781538976455-cutout.webp" width="1403" height="1600" alt="">
-        <img src="background/1781539174191-cutout.webp" width="1354" height="1600" alt="">
-      </div>
+      <div class="home-scene">
+        <div class="home-halo" aria-hidden="true"></div>
 
-      <div class="start-inner">
-        <div class="start-eyebrow">GULPING NO.1 MIDDLE SCHOOL · STAGE PROJECT</div>
-        <h1 class="hero"><span>一</span><span>中</span><span>偶</span><span>像</span><span>大</span><span>师</span></h1>
-        <div class="hero-sub">学园养成篇 · School Idol Producer</div>
-        <div class="start-rule" aria-hidden="true"><i></i><span>✦</span><i></i></div>
-        <div class="start-tagline">12 周养成 · 三选一出牌 · 用分数站上舞台</div>
+        <!-- 顶部状态栏 -->
+        <header class="game-topbar">
+          <div class="plv-badge" title="制作人等级">
+            <span class="plv-label">PLv</span>
+            <b id="plv-value">1</b>
+          </div>
 
-        <div class="start-actions">
-          <button class="btn" id="btn-start" type="button">选择偶像 ✨</button>
-          <button class="btn rules-toggle" id="rules-toggle" type="button" aria-haspopup="dialog">📖 玩法说明</button>
+          <div class="topbar-center">
+            <div class="topbar-time">
+              <span class="topbar-clock" id="home-clock">--:--</span>
+              <span class="topbar-clock-label">学园时间</span>
+            </div>
+            <div class="topbar-cur" title="一中奖学金">
+              <span class="cur-ic coin">🪙</span>
+              <b id="scholarship-total">0</b>
+            </div>
+            <div class="topbar-cur" title="已收集偶像">
+              <span class="cur-ic gems">👥</span>
+              <b id="home-idol-count">12 / 12</b>
+            </div>
+          </div>
+
+          <button class="round-btn topbar-btn" id="home-fullscreen" type="button" title="切换全屏" aria-label="切换全屏">⛶</button>
+        </header>
+
+        <!-- 左右功能栏 -->
+        <nav class="side-rail rail-left" aria-label="快捷功能">
+          <button class="rail-btn" id="home-rules" type="button">
+            <span class="rail-ic">📖</span><span class="rail-lb">玩法</span>
+          </button>
+          <button class="rail-btn" id="home-bgm-btn" type="button" aria-pressed="true" aria-label="播放 / 暂停背景音乐">
+            <span class="rail-ic" id="home-bgm-icon">🔊</span><span class="rail-lb">音乐</span>
+          </button>
+          <button class="rail-btn" id="home-bg-change" type="button">
+            <span class="rail-ic">🔀</span><span class="rail-lb">换立绘</span>
+          </button>
+        </nav>
+
+        <nav class="side-rail rail-right" aria-label="偶像功能">
+          <button class="rail-btn" id="home-roster" type="button">
+            <span class="rail-ic">👥</span><span class="rail-lb">偶像</span>
+          </button>
+          <button class="rail-btn" id="home-about" type="button">
+            <span class="rail-ic">💬</span><span class="rail-lb">关于</span>
+          </button>
+        </nav>
+
+        <!-- 品牌标题 -->
+        <div class="home-brand">
+          <div class="home-brand-eyebrow">GULPING NO.1 MIDDLE SCHOOL · STAGE PROJECT</div>
+          <h1 class="hero home-title" aria-label="一中偶像大师">
+            <span>一</span><span>中</span><span>偶</span><span>像</span><span>大</span><span>师</span>
+          </h1>
+          <div class="home-brand-sub">学园养成篇 · 12 周舞台企划</div>
         </div>
 
-        <div class="scholarship-bank glass" id="scholarship-bank">🪙 一中奖学金 <b id="scholarship-total">0</b></div>
+        <!-- 主立绘 -->
+        <div class="home-stage">
+          <div class="home-idol" id="home-idol">
+            <img id="home-idol-img" src="background/1781538976455-cutout.webp" width="1403" height="1600" alt="看板偶像立绘">
+          </div>
+        </div>
+
+        <!-- 主 CTA -->
+        <div class="home-cta">
+          <button class="produce-btn" id="btn-start" type="button">
+            <span class="produce-spark" aria-hidden="true">✦</span>
+            <span class="produce-main">开始养成</span>
+            <span class="produce-sub">PRODUCE</span>
+            <span class="produce-spark" aria-hidden="true">✦</span>
+          </button>
+          <button class="home-rules-link" id="rules-toggle" type="button" aria-haspopup="dialog">📖 玩法说明</button>
+        </div>
+
+        <!-- 底部导航 -->
+        <nav class="bottom-nav" aria-label="主导航">
+          <button class="nav-item active" type="button" data-nav="home" aria-current="page">
+            <span class="nav-ic">🏠</span><span class="nav-lb">主页</span>
+          </button>
+          <button class="nav-item" type="button" data-nav="idols">
+            <span class="nav-ic">👥</span><span class="nav-lb">偶像</span>
+          </button>
+          <button class="nav-item" type="button" data-nav="rules">
+            <span class="nav-ic">📖</span><span class="nav-lb">玩法</span>
+          </button>
+          <button class="nav-item" type="button" data-nav="music">
+            <span class="nav-ic" id="nav-bgm-icon">🎵</span><span class="nav-lb">音乐</span>
+          </button>
+        </nav>
       </div>
-      <div class="start-foot">AI 生成的校园同人企划 · 仅供娱乐</div>
     </section>
 
     <!-- 选角 -->
     <section class="screen" id="screen-select">
-      <div class="start-inner select-inner">
-        <div class="select-head">
-          <div class="select-eyebrow">IDOL ROSTER · 12 WEEK AUDITION</div>
-          <h2 class="hero select-title">选择你的偶像</h2>
-          <div class="hero-sub">Pick Your Idol · 得意色决定伤害加成时机，起始状态决定开局节奏</div>
+      <div class="select-scene">
+        <div class="select-bgtext" id="select-bgtext" aria-hidden="true">JINBAO</div>
+
+        <div class="select-stage" aria-hidden="true">
+          <div class="select-glow"></div>
+          <div class="select-art" id="select-art"></div>
         </div>
-        <div class="select-controls">
-          <button class="page-btn glass" id="idol-prev" type="button" title="上一页" aria-label="上一页">‹</button>
-          <span class="page-indicator" id="idol-page">1 / 3</span>
-          <button class="page-btn glass" id="idol-next" type="button" title="下一页" aria-label="下一页">›</button>
+
+        <header class="select-top">
+          <button class="round-btn" id="btn-back-start" type="button" aria-label="返回主页">‹</button>
+          <div class="select-identity">
+            <span class="sel-rarity" id="select-rarity" data-rarity="SR">SR</span>
+            <div class="sel-text">
+              <span class="sel-kicker">IDOL ROSTER · AUDITION</span>
+              <h2 id="select-name">叶锦宝</h2>
+              <span class="sel-sub" id="select-sub">JINBAO · 感性 · 得意色 唱</span>
+            </div>
+          </div>
+          <button class="round-btn" id="select-help" type="button" aria-label="玩法说明">❔</button>
+        </header>
+
+        <div class="select-body">
+          <div class="stat-rings" id="select-stats" aria-label="能力相性"></div>
+
+          <div class="plan-card">
+            <div class="plan-head">
+              <span class="plan-badge">方案</span>
+              <div class="plan-head-text">
+                <b id="select-plan-type">感性</b>
+                <small>得意色 · <span id="select-plan-color">🎤 唱</span></small>
+              </div>
+              <span class="plan-chip" id="select-plan-chip">SR</span>
+            </div>
+            <div class="plan-main">
+              <div class="plan-mini" id="select-plan-mini" aria-hidden="true"></div>
+              <div class="plan-info">
+                <b id="select-plan-name">叶锦宝</b>
+                <p id="select-plan-skill">开局 集中 +6</p>
+              </div>
+            </div>
+            <div class="plan-tags" id="select-plan-tags"></div>
+            <p class="plan-motto" id="select-motto"></p>
+            <p class="plan-desc" id="select-desc"></p>
+          </div>
         </div>
-        <div class="idol-grid" id="idol-grid"></div>
-        <button class="btn ghost" id="btn-back-start" type="button">← 返回首页</button>
+
+        <div class="select-actions">
+          <button class="big-action primary" id="select-start" type="button">开始养成</button>
+          <button class="big-action" id="select-random" type="button">随机换一位 🎲</button>
+        </div>
+
+        <div class="roster-head">
+          <span class="roster-title">全体偶像</span>
+          <span class="roster-note" id="select-count">1 / 12</span>
+        </div>
+        <div class="roster" id="idol-grid" role="listbox" aria-label="偶像列表"></div>
+
+        <nav class="bottom-nav select-nav" aria-label="主导航">
+          <button class="nav-item" type="button" data-nav="home">
+            <span class="nav-ic">🏠</span><span class="nav-lb">主页</span>
+          </button>
+          <button class="nav-item active" type="button" data-nav="idols" aria-current="page">
+            <span class="nav-ic">👥</span><span class="nav-lb">偶像</span>
+          </button>
+          <button class="nav-item" type="button" data-nav="rules">
+            <span class="nav-ic">📖</span><span class="nav-lb">玩法</span>
+          </button>
+          <button class="nav-item" type="button" data-nav="music">
+            <span class="nav-ic" id="sel-nav-bgm-icon">🎵</span><span class="nav-lb">音乐</span>
+          </button>
+        </nav>
       </div>
     </section>
 
